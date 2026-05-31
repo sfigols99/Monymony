@@ -31,12 +31,14 @@ Objetivo de **coste 0** usando los planes gratuitos.
 - [ ] Invitaciones por email (pendiente; de momento por código)
 - [ ] Soporte multi-hogar / cambio de hogar (de momento se usa el primero)
 
-## Fase 2 — Presupuesto mensual
+## Fase 2 — Presupuesto mensual ✅
 
-- [ ] Presupuesto derivado de la suma de salarios
-- [ ] Override **manual** del presupuesto por mes
-- [ ] Vista de planificación mensual (presupuesto vs. gastado)
-- [ ] Reparto de aportaciones por miembro según porcentaje
+- [x] Presupuesto derivado de la suma de salarios
+- [x] Override **manual** del presupuesto por mes (con reset a salarios)
+- [x] Vista de planificación mensual (presupuesto vs. gastado) con navegación por meses
+- [x] Reparto de aportaciones por miembro según porcentaje
+- [x] Gasto agrupado por concepto en el mes
+- [x] Página `/budget`
 
 ## Fase 3 — Conceptos (categorías) ✅
 

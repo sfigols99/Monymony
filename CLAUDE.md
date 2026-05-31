@@ -56,6 +56,13 @@ There is no test runner configured yet.
 - **`lib/household.ts`** — `getActiveHousehold()` loads the user's first
   household with members and salary-derived contribution percentages. The home
   page (`app/page.tsx`) redirects to `/onboarding` when there's no household.
+- **Budget** lives at `/budget`. `lib/budget.ts` (`getMonthlyBudget`,
+  `normalizePeriod`, `formatPeriod`) builds the monthly snapshot: planned total
+  (manual override from `monthly_budgets` or salary-derived), confirmed spend,
+  remaining, per-member contributions and spend-by-category. Server Actions in
+  `app/budget/actions.ts` (`setManualBudget` upserts an override,
+  `resetToSalaryBudget` deletes it). The page takes `?year=&month=` search
+  params; `MonthNav` switches months.
 - **Category actions** are Server Actions in `app/categories/actions.ts`
   (`createCategory`, `updateCategory`, `deleteCategory`). The `/categories`
   page lists + edits them inline. Icon/color catalogs live in `lib/icons.ts`

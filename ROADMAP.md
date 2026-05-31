@@ -21,12 +21,15 @@ Objetivo de **coste 0** usando los planes gratuitos.
 - [ ] Configurar proyecto Supabase real y aplicar migración
 - [ ] Despliegue inicial en Vercel
 
-## Fase 1 — Hogares y miembros
+## Fase 1 — Hogares y miembros ✅
 
-- [ ] Crear / unirse a un hogar (invitaciones por código o email)
-- [ ] Gestión de miembros y roles
-- [ ] Registrar el **salario** de cada miembro y calcular su **porcentaje de aportación**
-- [ ] Onboarding: tras el registro, crear o unirse a un hogar
+- [x] Crear / unirse a un hogar (invitaciones por **código**)
+- [x] Roster de miembros y rol (owner/member)
+- [x] Registrar el **salario** de cada miembro y calcular su **porcentaje de aportación**
+- [x] Onboarding: tras el registro, crear o unirse a un hogar
+- [x] Salir del hogar
+- [ ] Invitaciones por email (pendiente; de momento por código)
+- [ ] Soporte multi-hogar / cambio de hogar (de momento se usa el primero)
 
 ## Fase 2 — Presupuesto mensual
 

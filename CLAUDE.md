@@ -48,6 +48,16 @@ There is no test runner configured yet.
 - **Auth actions** are Server Actions in `app/login/actions.ts` (`login`,
   `signup`, `signOut`). The login page (`app/login/page.tsx`) is a Client
   Component using `useActionState`.
+- **Household actions** are Server Actions in `app/household/actions.ts`
+  (`createHousehold`, `joinHousehold`, `updateSalary`, `leaveHousehold`).
+  Create/join call SECURITY DEFINER RPCs (`create_household`,
+  `join_household_by_code`) so the cross-table writes / pre-membership lookup
+  work under RLS.
+- **`lib/household.ts`** — `getActiveHousehold()` loads the user's first
+  household with members and salary-derived contribution percentages. The home
+  page (`app/page.tsx`) redirects to `/onboarding` when there's no household.
+- **`lib/format.ts`** — `formatEuro` / `formatPercent` (es-ES locale).
+- Client UI bits live in `components/` (`SalaryForm`, `InviteCode`).
 - Prefer **Server Components** for data fetching and **Server Actions** for
   mutations. Reach for Client Components only when you need interactivity.
 - **Money** is stored as `numeric(12,2)` (euros) in Postgres. Format with the
@@ -69,7 +79,12 @@ Schema and RLS live in `supabase/migrations/`. Core tables:
 
 **RLS:** every data table is scoped to household membership via the
 `is_household_member(household_id)` SQL helper. When adding tables, enable RLS
-and add equivalent member-scoped policies.
+and add equivalent member-scoped policies. Co-member profile visibility uses
+`shares_household(user_id)`. Cross-table or pre-membership operations go through
+SECURITY DEFINER RPCs (see `0002_households_invites.sql`).
+
+Migrations are applied manually in the Supabase SQL editor, in order
+(`0001…`, `0002…`).
 
 ## Environment
 

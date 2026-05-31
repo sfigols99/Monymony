@@ -23,11 +23,15 @@ beyond auth + the DB schema are not built yet.
 
 ## Commands
 
+This project uses **pnpm** (pinned via `packageManager` in `package.json`; run
+`corepack enable` once so the right version is used).
+
 ```bash
-npm run dev     # start dev server (http://localhost:3000)
-npm run build   # production build
-npm run start   # serve production build
-npm run lint    # eslint
+pnpm install    # install dependencies
+pnpm dev        # start dev server (http://localhost:3000)
+pnpm build      # production build
+pnpm start      # serve production build
+pnpm lint       # eslint
 ```
 
 There is no test runner configured yet.

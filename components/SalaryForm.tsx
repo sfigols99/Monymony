@@ -13,6 +13,7 @@ export function SalaryForm({
 }) {
   const t = useTranslations("salary");
   const tc = useTranslations("common");
+  const te = useTranslations("errors");
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     updateSalary,
     null,
@@ -43,7 +44,9 @@ export function SalaryForm({
       >
         {pending ? tc("saving") : tc("save")}
       </button>
-      {state?.error && <p className="w-full text-sm text-red-600">{state.error}</p>}
+      {state?.error && (
+        <p className="w-full text-sm text-red-600">{te(state.error)}</p>
+      )}
     </form>
   );
 }

@@ -5,22 +5,22 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
+/**
+ * `error` is a translation key under the `errors` namespace (resolved on the
+ * client), not user-facing text. Keeps Server Actions locale-agnostic.
+ */
 export type ActionState = { error: string } | null;
 
 const createSchema = z.object({
-  name: z.string().trim().min(1, "Pon un nombre al hogar").max(80),
+  name: z.string().trim().min(1, "householdNameRequired").max(80),
 });
 
 const joinSchema = z.object({
-  code: z
-    .string()
-    .trim()
-    .min(4, "El código no es válido")
-    .max(12, "El código no es válido"),
+  code: z.string().trim().min(4, "codeInvalid").max(12, "codeInvalid"),
 });
 
 const salarySchema = z.object({
-  salary: z.coerce.number().min(0, "El salario no puede ser negativo"),
+  salary: z.coerce.number().min(0, "salaryNegative"),
 });
 
 /** Create a new household and make the current user its owner. */
@@ -37,7 +37,7 @@ export async function createHousehold(
   const { error } = await supabase.rpc("create_household", {
     p_name: parsed.data.name,
   });
-  if (error) return { error: error.message };
+  if (error) return { error: "generic" };
 
   revalidatePath("/", "layout");
   redirect("/");
@@ -59,9 +59,9 @@ export async function joinHousehold(
   });
   if (error) {
     if (error.message.includes("INVALID_CODE")) {
-      return { error: "No existe ningún hogar con ese código." };
+      return { error: "codeNotFound" };
     }
-    return { error: error.message };
+    return { error: "generic" };
   }
 
   revalidatePath("/", "layout");
@@ -82,10 +82,10 @@ export async function updateSalary(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "Sesión no válida." };
+  if (!user) return { error: "invalidSession" };
 
   const householdId = String(formData.get("household_id") ?? "");
-  if (!householdId) return { error: "Hogar no válido." };
+  if (!householdId) return { error: "invalidHousehold" };
 
   const { error } = await supabase
     .from("household_members")
@@ -93,7 +93,7 @@ export async function updateSalary(
     .eq("household_id", householdId)
     .eq("user_id", user.id);
 
-  if (error) return { error: error.message };
+  if (error) return { error: "generic" };
 
   revalidatePath("/", "layout");
   return null;

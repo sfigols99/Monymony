@@ -5,12 +5,13 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveHousehold } from "@/lib/household";
 
+/** `error` holds a translation key under the `errors` namespace. */
 export type ExpenseActionState = { error: string } | { ok: true } | null;
 
 const expenseSchema = z.object({
-  amount: z.coerce.number().positive("El importe debe ser mayor que 0"),
+  amount: z.coerce.number().positive("amountPositive"),
   categoryId: z.union([z.literal(""), z.string().uuid()]).transform((v) => (v === "" ? null : v)),
-  expenseDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha no válida"),
+  expenseDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "dateInvalid"),
   paidBy: z.union([z.literal(""), z.string().uuid()]).transform((v) => (v === "" ? null : v)),
   description: z
     .string()
@@ -42,9 +43,9 @@ export async function createExpense(
   }
 
   const household = await getActiveHousehold();
-  if (!household) return { error: "No tienes ningún hogar activo." };
+  if (!household) return { error: "noActiveHousehold" };
   if (!isMember(household, parsed.data.paidBy)) {
-    return { error: "El pagador no pertenece al hogar." };
+    return { error: "payerNotMember" };
   }
 
   const supabase = await createClient();
@@ -64,7 +65,7 @@ export async function createExpense(
     created_by: user?.id ?? null,
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: "generic" };
 
   revalidatePath("/expenses");
   revalidatePath("/budget");
@@ -77,7 +78,7 @@ export async function updateExpense(
   formData: FormData,
 ): Promise<ExpenseActionState> {
   const id = String(formData.get("id") ?? "");
-  if (!id) return { error: "Gasto no válido." };
+  if (!id) return { error: "invalidExpense" };
 
   const parsed = expenseSchema.safeParse({
     amount: formData.get("amount"),
@@ -91,9 +92,9 @@ export async function updateExpense(
   }
 
   const household = await getActiveHousehold();
-  if (!household) return { error: "No tienes ningún hogar activo." };
+  if (!household) return { error: "noActiveHousehold" };
   if (!isMember(household, parsed.data.paidBy)) {
-    return { error: "El pagador no pertenece al hogar." };
+    return { error: "payerNotMember" };
   }
 
   const supabase = await createClient();
@@ -108,7 +109,7 @@ export async function updateExpense(
     })
     .eq("id", id);
 
-  if (error) return { error: error.message };
+  if (error) return { error: "generic" };
 
   revalidatePath("/expenses");
   revalidatePath("/budget");

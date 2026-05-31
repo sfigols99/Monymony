@@ -5,14 +5,15 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveHousehold } from "@/lib/household";
 
+/** `error` holds a translation key under the `errors` namespace. */
 export type CategoryActionState = { error: string } | { ok: true } | null;
 
 const categorySchema = z.object({
-  name: z.string().trim().min(1, "Pon un nombre al concepto").max(50),
+  name: z.string().trim().min(1, "categoryNameRequired").max(50),
   color: z
     .string()
     .trim()
-    .regex(/^#[0-9a-fA-F]{6}$/, "Color no válido"),
+    .regex(/^#[0-9a-fA-F]{6}$/, "colorInvalid"),
   icon: z.string().trim().min(1).max(50),
   monthlyLimit: z
     .union([z.literal(""), z.coerce.number().min(0)])
@@ -35,7 +36,7 @@ export async function createCategory(
   }
 
   const household = await getActiveHousehold();
-  if (!household) return { error: "No tienes ningún hogar activo." };
+  if (!household) return { error: "noActiveHousehold" };
 
   const supabase = await createClient();
   const {
@@ -53,9 +54,9 @@ export async function createCategory(
 
   if (error) {
     if (error.code === "23505") {
-      return { error: "Ya existe un concepto con ese nombre." };
+      return { error: "categoryDuplicate" };
     }
-    return { error: error.message };
+    return { error: "generic" };
   }
 
   revalidatePath("/categories");
@@ -68,7 +69,7 @@ export async function updateCategory(
   formData: FormData,
 ): Promise<CategoryActionState> {
   const id = String(formData.get("id") ?? "");
-  if (!id) return { error: "Concepto no válido." };
+  if (!id) return { error: "invalidCategory" };
 
   const parsed = categorySchema.safeParse({
     name: formData.get("name"),
@@ -93,9 +94,9 @@ export async function updateCategory(
 
   if (error) {
     if (error.code === "23505") {
-      return { error: "Ya existe un concepto con ese nombre." };
+      return { error: "categoryDuplicate" };
     }
-    return { error: error.message };
+    return { error: "generic" };
   }
 
   revalidatePath("/categories");

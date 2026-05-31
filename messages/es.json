@@ -154,5 +154,31 @@
     "bannerOne": "1 alerta activada",
     "bannerMany": "{count} alertas activadas",
     "bannerLine": "{name} — {scope}: {spent} de {limit} ({percent})"
+  },
+  "errors": {
+    "generic": "Algo ha ido mal. Inténtalo de nuevo.",
+    "householdNameRequired": "Pon un nombre al hogar",
+    "codeInvalid": "El código no es válido",
+    "codeNotFound": "No existe ningún hogar con ese código.",
+    "salaryNegative": "El salario no puede ser negativo",
+    "invalidSession": "Sesión no válida.",
+    "invalidHousehold": "Hogar no válido.",
+    "noActiveHousehold": "No tienes ningún hogar activo.",
+    "categoryNameRequired": "Pon un nombre al concepto",
+    "colorInvalid": "Color no válido",
+    "categoryDuplicate": "Ya existe un concepto con ese nombre.",
+    "invalidCategory": "Concepto no válido.",
+    "amountPositive": "El importe debe ser mayor que 0",
+    "dateInvalid": "Fecha no válida",
+    "payerNotMember": "El pagador no pertenece al hogar.",
+    "invalidExpense": "Gasto no válido.",
+    "budgetNegative": "El presupuesto no puede ser negativo",
+    "alertNameRequired": "Pon un nombre a la alerta",
+    "thresholdPositive": "El umbral debe ser mayor que 0",
+    "invalidAlert": "Alerta no válida.",
+    "invalidCredentials": "Email o contraseña incorrectos.",
+    "emailInUse": "Ese email ya está registrado.",
+    "emailNotConfirmed": "Confirma tu email antes de iniciar sesión.",
+    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres."
   }
 }

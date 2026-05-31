@@ -5,16 +5,17 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveHousehold } from "@/lib/household";
 
+/** `error` holds a translation key under the `errors` namespace. */
 export type AlertActionState = { error: string } | { ok: true } | null;
 
 const alertSchema = z
   .object({
-    name: z.string().trim().min(1, "Pon un nombre a la alerta").max(60),
+    name: z.string().trim().min(1, "alertNameRequired").max(60),
     categoryId: z
       .union([z.literal(""), z.string().uuid()])
       .transform((v) => (v === "" ? null : v)),
     thresholdType: z.enum(["percent", "amount"]),
-    thresholdValue: z.coerce.number().positive("El umbral debe ser mayor que 0"),
+    thresholdValue: z.coerce.number().positive("thresholdPositive"),
   })
   .transform((data) => ({
     name: data.name,
@@ -41,7 +42,7 @@ export async function createAlert(
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const household = await getActiveHousehold();
-  if (!household) return { error: "No tienes ningún hogar activo." };
+  if (!household) return { error: "noActiveHousehold" };
 
   // A per-category percent threshold needs the category to have a limit.
   const supabase = await createClient();
@@ -59,7 +60,7 @@ export async function createAlert(
     created_by: user?.id ?? null,
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: "generic" };
 
   revalidatePath("/alerts");
   revalidatePath("/");
@@ -72,7 +73,7 @@ export async function updateAlert(
   formData: FormData,
 ): Promise<AlertActionState> {
   const id = String(formData.get("id") ?? "");
-  if (!id) return { error: "Alerta no válida." };
+  if (!id) return { error: "invalidAlert" };
 
   const parsed = parse(formData);
   if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -88,7 +89,7 @@ export async function updateAlert(
     })
     .eq("id", id);
 
-  if (error) return { error: error.message };
+  if (error) return { error: "generic" };
 
   revalidatePath("/alerts");
   revalidatePath("/");

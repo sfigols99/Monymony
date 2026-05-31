@@ -8,6 +8,7 @@ import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 export default function LoginPage() {
   const t = useTranslations("auth");
   const tc = useTranslations("common");
+  const te = useTranslations("errors");
   const [mode, setMode] = useState<"login" | "signup">("login");
   const action = mode === "login" ? login : signup;
   const [state, formAction, pending] = useActionState<AuthState, FormData>(
@@ -74,7 +75,7 @@ export default function LoginPage() {
           </div>
 
           {state?.error && (
-            <p className="text-sm text-red-600">{state.error}</p>
+            <p className="text-sm text-red-600">{te(state.error)}</p>
           )}
 
           <button

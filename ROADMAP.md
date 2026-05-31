@@ -80,5 +80,5 @@ Objetivo de **coste 0** usando los planes gratuitos.
 - [ ] Tests (unitarios + e2e)
 - [ ] Diseño responsive / PWA
 - [x] i18n con **next-intl** (es/en/ca, selección por cookie; español por defecto)
-  - [ ] Traducir los mensajes de error de las Server Actions (Zod) — aún en español
+  - [x] Mensajes de error de las Server Actions traducidos (devuelven claves del namespace `errors`)
 - [ ] Accesibilidad

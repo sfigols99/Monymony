@@ -11,6 +11,7 @@ import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 export default function OnboardingPage() {
   const t = useTranslations("onboarding");
+  const te = useTranslations("errors");
   const [mode, setMode] = useState<"create" | "join">("create");
 
   const [createState, createAction, creating] = useActionState<
@@ -74,7 +75,7 @@ export default function OnboardingPage() {
               />
             </div>
             {createState?.error && (
-              <p className="text-sm text-red-600">{createState.error}</p>
+              <p className="text-sm text-red-600">{te(createState.error)}</p>
             )}
             <button
               type="submit"
@@ -101,7 +102,7 @@ export default function OnboardingPage() {
               />
             </div>
             {joinState?.error && (
-              <p className="text-sm text-red-600">{joinState.error}</p>
+              <p className="text-sm text-red-600">{te(joinState.error)}</p>
             )}
             <button
               type="submit"

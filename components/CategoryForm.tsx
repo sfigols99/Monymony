@@ -32,6 +32,7 @@ export function CategoryForm({
 }) {
   const t = useTranslations("categories");
   const tc = useTranslations("common");
+  const te = useTranslations("errors");
   const editing = Boolean(initial);
   const action = editing ? updateCategory : createCategory;
   const [state, formAction, pending] = useActionState<
@@ -112,7 +113,7 @@ export function CategoryForm({
       </div>
 
       {state && "error" in state && (
-        <p className="text-sm text-red-600">{state.error}</p>
+        <p className="text-sm text-red-600">{te(state.error)}</p>
       )}
 
       <div className="flex gap-2">

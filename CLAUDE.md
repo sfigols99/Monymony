@@ -133,7 +133,12 @@ Copy `.env.example` to `.env.local` and fill in:
   (`<html lang>` is dynamic). Use `useTranslations` in Client Components and
   `getTranslations`/`getLocale` in Server Components. Locale-aware dates/periods
   go through `formatPeriod(year, month, locale)`. Keep the three message files
-  in **key parity**; default locale is Spanish. NOTE: Zod error strings in the
-  Server Actions are still hardcoded in Spanish (pending).
+  in **key parity**; default locale is Spanish.
+- **Action errors:** Server Actions are locale-agnostic — they return a
+  translation **key** (e.g. `"amountPositive"`, `"generic"`) under the `errors`
+  namespace, not user text. Zod messages are the keys themselves; Supabase auth
+  errors map to keys via `authErrorKey`. Forms resolve them with
+  `useTranslations("errors")` (`te(state.error)`). When adding an action error,
+  add the key to all three `messages/*.json` under `errors`.
 - Match the existing component style (Tailwind utility classes, rounded cards,
   indigo accent).

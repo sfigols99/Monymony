@@ -29,6 +29,7 @@ export function AlertForm({
 }) {
   const t = useTranslations("alerts");
   const tc = useTranslations("common");
+  const te = useTranslations("errors");
   const editing = Boolean(initial);
   const action = editing ? updateAlert : createAlert;
   const [state, formAction, pending] = useActionState<
@@ -122,7 +123,7 @@ export function AlertForm({
       </div>
 
       {state && "error" in state && (
-        <p className="text-sm text-red-600">{state.error}</p>
+        <p className="text-sm text-red-600">{te(state.error)}</p>
       )}
 
       <div className="flex gap-2">

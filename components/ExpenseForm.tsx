@@ -42,6 +42,7 @@ export function ExpenseForm({
 }) {
   const t = useTranslations("expenses");
   const tc = useTranslations("common");
+  const te = useTranslations("errors");
   const editing = Boolean(initial);
   const action = editing ? updateExpense : createExpense;
   const [state, formAction, pending] = useActionState<
@@ -149,7 +150,7 @@ export function ExpenseForm({
       </div>
 
       {state && "error" in state && (
-        <p className="text-sm text-red-600">{state.error}</p>
+        <p className="text-sm text-red-600">{te(state.error)}</p>
       )}
 
       <div className="flex gap-2">

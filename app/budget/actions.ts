@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveHousehold } from "@/lib/household";
 
+/** `error` holds a translation key under the `errors` namespace. */
 export type BudgetActionState = { error: string } | { ok: true } | null;
 
 const periodSchema = z.object({
@@ -13,7 +14,7 @@ const periodSchema = z.object({
 });
 
 const manualSchema = periodSchema.extend({
-  total: z.coerce.number().min(0, "El presupuesto no puede ser negativo"),
+  total: z.coerce.number().min(0, "budgetNegative"),
 });
 
 /** Set a manual budget override for a given month. */
@@ -31,7 +32,7 @@ export async function setManualBudget(
   }
 
   const household = await getActiveHousehold();
-  if (!household) return { error: "No tienes ningún hogar activo." };
+  if (!household) return { error: "noActiveHousehold" };
 
   const supabase = await createClient();
   const { error } = await supabase.from("monthly_budgets").upsert(
@@ -46,7 +47,7 @@ export async function setManualBudget(
     { onConflict: "household_id,year,month" },
   );
 
-  if (error) return { error: error.message };
+  if (error) return { error: "generic" };
 
   revalidatePath("/budget");
   return { ok: true };

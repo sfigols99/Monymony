@@ -28,6 +28,7 @@ export function BudgetForm({
 }) {
   const t = useTranslations("budget");
   const tc = useTranslations("common");
+  const te = useTranslations("errors");
   const [state, formAction, pending] = useActionState<
     BudgetActionState,
     FormData
@@ -72,7 +73,7 @@ export function BudgetForm({
       </form>
 
       {state && "error" in state && (
-        <p className="text-sm text-red-600">{state.error}</p>
+        <p className="text-sm text-red-600">{te(state.error)}</p>
       )}
 
       {isManual && (

@@ -154,5 +154,31 @@
     "bannerOne": "1 alert triggered",
     "bannerMany": "{count} alerts triggered",
     "bannerLine": "{name} — {scope}: {spent} of {limit} ({percent})"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "householdNameRequired": "Give the household a name",
+    "codeInvalid": "The code is not valid",
+    "codeNotFound": "No household exists with that code.",
+    "salaryNegative": "Salary can't be negative",
+    "invalidSession": "Invalid session.",
+    "invalidHousehold": "Invalid household.",
+    "noActiveHousehold": "You don't have an active household.",
+    "categoryNameRequired": "Give the category a name",
+    "colorInvalid": "Invalid color",
+    "categoryDuplicate": "A category with that name already exists.",
+    "invalidCategory": "Invalid category.",
+    "amountPositive": "The amount must be greater than 0",
+    "dateInvalid": "Invalid date",
+    "payerNotMember": "The payer isn't a member of the household.",
+    "invalidExpense": "Invalid expense.",
+    "budgetNegative": "The budget can't be negative",
+    "alertNameRequired": "Give the alert a name",
+    "thresholdPositive": "The threshold must be greater than 0",
+    "invalidAlert": "Invalid alert.",
+    "invalidCredentials": "Wrong email or password.",
+    "emailInUse": "That email is already registered.",
+    "emailNotConfirmed": "Confirm your email before signing in.",
+    "passwordTooShort": "The password must be at least 6 characters."
   }
 }

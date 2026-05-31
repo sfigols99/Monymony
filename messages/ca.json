@@ -154,5 +154,31 @@
     "bannerOne": "1 alerta activada",
     "bannerMany": "{count} alertes activades",
     "bannerLine": "{name} — {scope}: {spent} de {limit} ({percent})"
+  },
+  "errors": {
+    "generic": "Alguna cosa ha anat malament. Torna-ho a provar.",
+    "householdNameRequired": "Posa un nom a la llar",
+    "codeInvalid": "El codi no és vàlid",
+    "codeNotFound": "No existeix cap llar amb aquest codi.",
+    "salaryNegative": "El salari no pot ser negatiu",
+    "invalidSession": "Sessió no vàlida.",
+    "invalidHousehold": "Llar no vàlida.",
+    "noActiveHousehold": "No tens cap llar activa.",
+    "categoryNameRequired": "Posa un nom al concepte",
+    "colorInvalid": "Color no vàlid",
+    "categoryDuplicate": "Ja existeix un concepte amb aquest nom.",
+    "invalidCategory": "Concepte no vàlid.",
+    "amountPositive": "L'import ha de ser més gran que 0",
+    "dateInvalid": "Data no vàlida",
+    "payerNotMember": "El pagador no pertany a la llar.",
+    "invalidExpense": "Despesa no vàlida.",
+    "budgetNegative": "El pressupost no pot ser negatiu",
+    "alertNameRequired": "Posa un nom a l'alerta",
+    "thresholdPositive": "El llindar ha de ser més gran que 0",
+    "invalidAlert": "Alerta no vàlida.",
+    "invalidCredentials": "Correu o contrasenya incorrectes.",
+    "emailInUse": "Aquest correu ja està registrat.",
+    "emailNotConfirmed": "Confirma el teu correu abans d'iniciar la sessió.",
+    "passwordTooShort": "La contrasenya ha de tenir almenys 6 caràcters."
   }
 }

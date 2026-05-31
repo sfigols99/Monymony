@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { type ExpenseOption } from "./ExpenseForm";
 
 /**
@@ -22,6 +23,7 @@ export function ExpenseFilters({
   categories: ExpenseOption[];
   members: ExpenseOption[];
 }) {
+  const t = useTranslations("expenses");
   const router = useRouter();
 
   function go(next: Partial<{ year: number; month: number; categoryId: string; paidBy: string }>) {
@@ -42,7 +44,7 @@ export function ExpenseFilters({
     <div className="flex flex-wrap items-end gap-3">
       <div>
         <label htmlFor="f-month" className="mb-1 block text-xs font-medium text-neutral-500">
-          Mes
+          {t("filterMonth")}
         </label>
         <input
           id="f-month"
@@ -57,7 +59,7 @@ export function ExpenseFilters({
       </div>
       <div>
         <label htmlFor="f-cat" className="mb-1 block text-xs font-medium text-neutral-500">
-          Concepto
+          {t("filterCategory")}
         </label>
         <select
           id="f-cat"
@@ -65,7 +67,7 @@ export function ExpenseFilters({
           onChange={(e) => go({ categoryId: e.target.value })}
           className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
         >
-          <option value="">Todos</option>
+          <option value="">{t("filterAll")}</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.label}
@@ -75,7 +77,7 @@ export function ExpenseFilters({
       </div>
       <div>
         <label htmlFor="f-payer" className="mb-1 block text-xs font-medium text-neutral-500">
-          Pagado por
+          {t("filterPayer")}
         </label>
         <select
           id="f-payer"
@@ -83,7 +85,7 @@ export function ExpenseFilters({
           onChange={(e) => go({ paidBy: e.target.value })}
           className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
         >
-          <option value="">Todos</option>
+          <option value="">{t("filterAll")}</option>
           {members.map((m) => (
             <option key={m.id} value={m.id}>
               {m.label}
@@ -97,7 +99,7 @@ export function ExpenseFilters({
           onClick={() => router.push(`/expenses?year=${year}&month=${month}`)}
           className="rounded-lg px-3 py-2 text-sm text-neutral-500 hover:underline"
         >
-          Limpiar filtros
+          {t("clearFilters")}
         </button>
       )}
     </div>

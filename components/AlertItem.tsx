@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { type Alert } from "@/lib/alerts";
 import { deleteAlert, toggleAlert } from "@/app/alerts/actions";
 import { formatEuro, formatPercent } from "@/lib/format";
@@ -15,6 +16,8 @@ export function AlertItem({
   alert: Alert;
   categories: ExpenseOption[];
 }) {
+  const t = useTranslations("alerts");
+  const tc = useTranslations("common");
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
@@ -42,7 +45,7 @@ export function AlertItem({
       : alert.thresholdPercent != null
         ? formatPercent(alert.thresholdPercent)
         : "—";
-  const scope = alert.categoryName ?? "Todo el hogar";
+  const scope = alert.categoryName ?? t("wholeHousehold");
 
   return (
     <li
@@ -62,7 +65,7 @@ export function AlertItem({
         <div className="min-w-0">
           <p className="truncate font-medium">{alert.name}</p>
           <p className="truncate text-xs text-neutral-400">
-            {scope} · umbral {threshold}
+            {scope} · {t("thresholdLabel", { value: threshold })}
           </p>
         </div>
       </div>
@@ -74,16 +77,16 @@ export function AlertItem({
           <button
             type="submit"
             className="rounded-lg px-2 py-1 text-xs font-medium text-neutral-500 transition hover:bg-neutral-100 dark:hover:bg-neutral-800"
-            title={alert.isActive ? "Desactivar" : "Activar"}
+            title={alert.isActive ? t("deactivate") : t("activate")}
           >
-            {alert.isActive ? "Activa" : "Inactiva"}
+            {alert.isActive ? t("active") : t("inactive")}
           </button>
         </form>
         <button
           type="button"
           onClick={() => setEditing(true)}
           className="rounded-lg p-2 text-neutral-500 transition hover:bg-neutral-100 dark:hover:bg-neutral-800"
-          title="Editar"
+          title={tc("edit")}
         >
           <span className="material-symbols-rounded text-[20px]">edit</span>
         </button>
@@ -94,14 +97,14 @@ export function AlertItem({
               type="submit"
               className="rounded-lg bg-red-600 px-2 py-1 text-xs font-medium text-white transition hover:bg-red-700"
             >
-              Borrar
+              {tc("confirmDelete")}
             </button>
             <button
               type="button"
               onClick={() => setConfirming(false)}
               className="rounded-lg px-2 py-1 text-xs text-neutral-500 hover:underline"
             >
-              No
+              {tc("no")}
             </button>
           </form>
         ) : (
@@ -109,7 +112,7 @@ export function AlertItem({
             type="button"
             onClick={() => setConfirming(true)}
             className="rounded-lg p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-red-600 dark:hover:bg-neutral-800"
-            title="Borrar"
+            title={tc("delete")}
           >
             <span className="material-symbols-rounded text-[20px]">delete</span>
           </button>

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 /** Shows the household invite code with a copy-to-clipboard button. */
 export function InviteCode({ code }: { code: string }) {
+  const t = useTranslations("invite");
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -26,7 +28,7 @@ export function InviteCode({ code }: { code: string }) {
         onClick={copy}
         className="rounded-lg border border-neutral-300 px-3 py-1.5 text-sm font-medium transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
       >
-        {copied ? "¡Copiado!" : "Copiar"}
+        {copied ? t("copied") : t("copy")}
       </button>
     </div>
   );

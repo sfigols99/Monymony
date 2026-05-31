@@ -19,6 +19,7 @@ beyond auth + the DB schema are not built yet.
 - **Tailwind CSS v4** (configured via `@import "tailwindcss"` in `app/globals.css`; no `tailwind.config`).
 - **Supabase** — Auth, Postgres, Storage. Accessed via `@supabase/ssr`.
 - **Zod** — validation.
+- **next-intl** — i18n (es/en/ca), cookie-based locale (no URL routing).
 - **Vercel** — hosting. Goal: stay on free tiers (cost 0).
 
 ## Commands
@@ -122,6 +123,17 @@ Copy `.env.example` to `.env.local` and fill in:
 
 - Keep new DB changes as additive numbered migrations in `supabase/migrations/`.
 - Scope all household data with RLS; never trust the client for `household_id`.
-- UI copy is in **Spanish** (`<html lang="es">`); keep it consistent.
+- **i18n (next-intl):** UI copy lives in `messages/{es,en,ca}.json`, grouped by
+  namespace (one per view: `common`, `auth`, `onboarding`, `home`, `budget`,
+  `categories`, `expenses`, `alerts`, …). The active locale comes from the
+  `NEXT_LOCALE` cookie (set by `components/LocaleSwitcher` via the
+  `setLocale` action in `app/i18n-actions.ts`); **no URL `/[locale]` routing**.
+  Config in `i18n/request.ts` + `i18n/locales.ts`, wired through
+  `next.config.ts` and the `NextIntlClientProvider` in `app/layout.tsx`
+  (`<html lang>` is dynamic). Use `useTranslations` in Client Components and
+  `getTranslations`/`getLocale` in Server Components. Locale-aware dates/periods
+  go through `formatPeriod(year, month, locale)`. Keep the three message files
+  in **key parity**; default locale is Spanish. NOTE: Zod error strings in the
+  Server Actions are still hardcoded in Spanish (pending).
 - Match the existing component style (Tailwind utility classes, rounded cards,
   indigo accent).

@@ -43,14 +43,17 @@ export function normalizePeriod(year?: number, month?: number) {
   return { year: y, month: m };
 }
 
-const MONTHS_ES = [
-  "enero", "febrero", "marzo", "abril", "mayo", "junio",
-  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
-];
-
-/** "mayo de 2026" */
-export function formatPeriod(year: number, month: number): string {
-  return `${MONTHS_ES[month - 1]} de ${year}`;
+/** "mayo de 2026" / "May 2026" / "maig de 2026" — formatted for the locale. */
+export function formatPeriod(
+  year: number,
+  month: number,
+  locale = "es",
+): string {
+  const d = new Date(year, month - 1, 1);
+  return new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+  }).format(d);
 }
 
 function monthRange(year: number, month: number) {

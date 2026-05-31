@@ -1,9 +1,13 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { login, signup, type AuthState } from "./actions";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 export default function LoginPage() {
+  const t = useTranslations("auth");
+  const tc = useTranslations("common");
   const [mode, setMode] = useState<"login" | "signup">("login");
   const action = mode === "login" ? login : signup;
   const [state, formAction, pending] = useActionState<AuthState, FormData>(
@@ -15,17 +19,20 @@ export default function LoginPage() {
     <main className="flex min-h-dvh items-center justify-center bg-neutral-50 p-4 dark:bg-neutral-950">
       <div className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Monymony</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Gastos compartidos del hogar
-          </p>
+          <div className="mb-3 flex justify-end">
+            <LocaleSwitcher />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {tc("appName")}
+          </h1>
+          <p className="mt-1 text-sm text-neutral-500">{t("subtitle")}</p>
         </div>
 
         <form action={formAction} className="space-y-4">
           {mode === "signup" && (
             <div>
               <label htmlFor="full_name" className="mb-1 block text-sm font-medium">
-                Nombre
+                {t("name")}
               </label>
               <input
                 id="full_name"
@@ -39,7 +46,7 @@ export default function LoginPage() {
 
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium">
-              Email
+              {t("email")}
             </label>
             <input
               id="email"
@@ -53,7 +60,7 @@ export default function LoginPage() {
 
           <div>
             <label htmlFor="password" className="mb-1 block text-sm font-medium">
-              Contraseña
+              {t("password")}
             </label>
             <input
               id="password"
@@ -76,10 +83,10 @@ export default function LoginPage() {
             className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
           >
             {pending
-              ? "Cargando…"
+              ? tc("loading")
               : mode === "login"
-                ? "Iniciar sesión"
-                : "Crear cuenta"}
+                ? t("login")
+                : t("signup")}
           </button>
         </form>
 
@@ -88,9 +95,7 @@ export default function LoginPage() {
           onClick={() => setMode(mode === "login" ? "signup" : "login")}
           className="mt-4 w-full text-center text-sm text-neutral-500 hover:text-indigo-600"
         >
-          {mode === "login"
-            ? "¿No tienes cuenta? Regístrate"
-            : "¿Ya tienes cuenta? Inicia sesión"}
+          {mode === "login" ? t("toSignup") : t("toLogin")}
         </button>
       </div>
     </main>

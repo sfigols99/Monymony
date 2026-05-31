@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   createAlert,
   updateAlert,
@@ -26,6 +27,8 @@ export function AlertForm({
   initial?: AlertInitial;
   onDone?: () => void;
 }) {
+  const t = useTranslations("alerts");
+  const tc = useTranslations("common");
   const editing = Boolean(initial);
   const action = editing ? updateAlert : createAlert;
   const [state, formAction, pending] = useActionState<
@@ -57,7 +60,7 @@ export function AlertForm({
 
       <div>
         <label htmlFor="al-name" className="mb-1 block text-sm font-medium">
-          Nombre de la alerta
+          {t("name")}
         </label>
         <input
           id="al-name"
@@ -66,14 +69,14 @@ export function AlertForm({
           required
           maxLength={60}
           defaultValue={initial?.name ?? ""}
-          placeholder="Supermercado fuera de control"
+          placeholder={t("namePlaceholder")}
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
         />
       </div>
 
       <div>
         <label htmlFor="al-cat" className="mb-1 block text-sm font-medium">
-          Ámbito
+          {t("scope")}
         </label>
         <select
           id="al-cat"
@@ -81,7 +84,7 @@ export function AlertForm({
           defaultValue={initial?.categoryId ?? ""}
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
         >
-          <option value="">Todo el hogar</option>
+          <option value="">{t("wholeHousehold")}</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.label}
@@ -91,7 +94,7 @@ export function AlertForm({
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium">Umbral</label>
+        <label className="mb-1 block text-sm font-medium">{t("threshold")}</label>
         <div className="flex items-center gap-2">
           <input
             name="thresholdValue"
@@ -109,14 +112,12 @@ export function AlertForm({
             onChange={(e) => setThresholdType(e.target.value as "percent" | "amount")}
             className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
           >
-            <option value="percent">% del presupuesto/límite</option>
-            <option value="amount">€ (importe absoluto)</option>
+            <option value="percent">{t("thresholdPercent")}</option>
+            <option value="amount">{t("thresholdAmount")}</option>
           </select>
         </div>
         <p className="mt-1.5 text-xs text-neutral-400">
-          {thresholdType === "percent"
-            ? "Salta al alcanzar ese % del presupuesto del hogar (o del límite del concepto)."
-            : "Salta cuando el gasto del mes alcanza ese importe."}
+          {thresholdType === "percent" ? t("hintPercent") : t("hintAmount")}
         </p>
       </div>
 
@@ -130,7 +131,7 @@ export function AlertForm({
           disabled={pending}
           className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
         >
-          {pending ? "Guardando…" : editing ? "Guardar cambios" : "Crear alerta"}
+          {pending ? tc("saving") : editing ? tc("saveChanges") : t("create")}
         </button>
         {editing && onDone && (
           <button
@@ -138,7 +139,7 @@ export function AlertForm({
             onClick={onDone}
             className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
           >
-            Cancelar
+            {tc("cancel")}
           </button>
         )}
       </div>

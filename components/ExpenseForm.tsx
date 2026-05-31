@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import {
   createExpense,
   updateExpense,
@@ -39,6 +40,8 @@ export function ExpenseForm({
   initial?: ExpenseInitial;
   onDone?: () => void;
 }) {
+  const t = useTranslations("expenses");
+  const tc = useTranslations("common");
   const editing = Boolean(initial);
   const action = editing ? updateExpense : createExpense;
   const [state, formAction, pending] = useActionState<
@@ -61,7 +64,7 @@ export function ExpenseForm({
       <div className="flex flex-wrap gap-4">
         <div>
           <label htmlFor="exp-amount" className="mb-1 block text-sm font-medium">
-            Importe (€)
+            {t("amount")}
           </label>
           <input
             id="exp-amount"
@@ -77,7 +80,7 @@ export function ExpenseForm({
         </div>
         <div>
           <label htmlFor="exp-date" className="mb-1 block text-sm font-medium">
-            Fecha
+            {t("date")}
           </label>
           <input
             id="exp-date"
@@ -93,7 +96,7 @@ export function ExpenseForm({
       <div className="flex flex-wrap gap-4">
         <div className="flex-1">
           <label htmlFor="exp-cat" className="mb-1 block text-sm font-medium">
-            Concepto
+            {t("category")}
           </label>
           <select
             id="exp-cat"
@@ -101,7 +104,7 @@ export function ExpenseForm({
             defaultValue={initial?.categoryId ?? ""}
             className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
           >
-            <option value="">Sin concepto</option>
+            <option value="">{t("noCategory")}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.label}
@@ -111,7 +114,7 @@ export function ExpenseForm({
         </div>
         <div className="flex-1">
           <label htmlFor="exp-payer" className="mb-1 block text-sm font-medium">
-            Pagado por
+            {t("paidBy")}
           </label>
           <select
             id="exp-payer"
@@ -119,7 +122,7 @@ export function ExpenseForm({
             defaultValue={initial?.paidBy ?? ""}
             className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
           >
-            <option value="">Sin asignar</option>
+            <option value="">{t("unassigned")}</option>
             {members.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.label}
@@ -131,8 +134,8 @@ export function ExpenseForm({
 
       <div>
         <label htmlFor="exp-desc" className="mb-1 block text-sm font-medium">
-          Descripción{" "}
-          <span className="font-normal text-neutral-400">— opcional</span>
+          {t("description")}{" "}
+          <span className="font-normal text-neutral-400">— {tc("optional")}</span>
         </label>
         <input
           id="exp-desc"
@@ -140,7 +143,7 @@ export function ExpenseForm({
           type="text"
           maxLength={200}
           defaultValue={initial?.description ?? ""}
-          placeholder="Compra semanal"
+          placeholder={t("descriptionPlaceholder")}
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
         />
       </div>
@@ -155,7 +158,7 @@ export function ExpenseForm({
           disabled={pending}
           className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
         >
-          {pending ? "Guardando…" : editing ? "Guardar cambios" : "Añadir gasto"}
+          {pending ? tc("saving") : editing ? tc("saveChanges") : t("add")}
         </button>
         {editing && onDone && (
           <button
@@ -163,7 +166,7 @@ export function ExpenseForm({
             onClick={onDone}
             className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
           >
-            Cancelar
+            {tc("cancel")}
           </button>
         )}
       </div>

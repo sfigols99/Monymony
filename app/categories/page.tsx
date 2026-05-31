@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getActiveHousehold } from "@/lib/household";
 import { getCategories } from "@/lib/categories";
 import { CategoryForm } from "@/components/CategoryForm";
@@ -11,6 +12,7 @@ export default async function CategoriesPage() {
     redirect("/onboarding");
   }
 
+  const t = await getTranslations("categories");
   const categories = await getCategories(household.id);
 
   return (
@@ -23,33 +25,28 @@ export default async function CategoriesPage() {
           >
             ← {household.name}
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight">Conceptos</h1>
-          <p className="text-sm text-neutral-500">
-            Categorías de gasto del hogar, con color e icono.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-sm text-neutral-500">{t("subtitle")}</p>
         </div>
       </header>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* New category */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
-          <h2 className="mb-4 text-lg font-semibold">Nuevo concepto</h2>
+          <h2 className="mb-4 text-lg font-semibold">{t("newTitle")}</h2>
           <CategoryForm />
         </section>
 
         {/* Existing categories */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
           <h2 className="mb-4 text-lg font-semibold">
-            Tus conceptos{" "}
+            {t("yoursTitle")}{" "}
             <span className="text-sm font-normal text-neutral-400">
               ({categories.length})
             </span>
           </h2>
           {categories.length === 0 ? (
-            <p className="text-sm text-neutral-400">
-              Aún no hay conceptos. Crea el primero (energía, supermercado,
-              préstamos…).
-            </p>
+            <p className="text-sm text-neutral-400">{t("empty")}</p>
           ) : (
             <ul className="space-y-2">
               {categories.map((c) => (

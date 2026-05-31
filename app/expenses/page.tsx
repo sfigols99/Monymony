@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { getActiveHousehold } from "@/lib/household";
 import { getCategories } from "@/lib/categories";
 import { getExpenses } from "@/lib/expenses";
@@ -24,6 +25,9 @@ export default async function ExpensesPage({
     redirect("/onboarding");
   }
 
+  const t = await getTranslations("expenses");
+  const locale = await getLocale();
+
   const sp = await searchParams;
   const { year, month } = normalizePeriod(
     sp.year ? Number(sp.year) : undefined,
@@ -46,7 +50,7 @@ export default async function ExpensesPage({
   }));
   const memberOptions: ExpenseOption[] = household.members.map((m) => ({
     id: m.userId,
-    label: m.fullName || m.email || "Miembro",
+    label: m.fullName || m.email || "—",
   }));
 
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -58,30 +62,29 @@ export default async function ExpensesPage({
           <Link href="/" className="text-sm text-neutral-500 hover:text-indigo-600">
             ← {household.name}
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight">Gastos</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-sm capitalize text-neutral-500">
-            {formatPeriod(year, month)}
+            {formatPeriod(year, month, locale)}
           </p>
         </div>
         <Link
           href={`/budget?year=${year}&month=${month}`}
           className="rounded-lg border border-neutral-300 px-3 py-1.5 text-sm font-medium transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
         >
-          Ver presupuesto
+          {t("viewBudget")}
         </Link>
       </header>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* New expense */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
-          <h2 className="mb-4 text-lg font-semibold">Nuevo gasto</h2>
+          <h2 className="mb-4 text-lg font-semibold">{t("newTitle")}</h2>
           {categoryOptions.length === 0 && (
             <p className="mb-3 text-sm text-amber-600">
-              Aún no tienes conceptos.{" "}
+              {t("noCategoriesWarn")}{" "}
               <Link href="/categories" className="underline">
-                Crea alguno
-              </Link>{" "}
-              para clasificar mejor tus gastos.
+                {t("createSome")}
+              </Link>
             </p>
           )}
           <ExpenseForm categories={categoryOptions} members={memberOptions} />
@@ -91,7 +94,7 @@ export default async function ExpensesPage({
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
           <div className="mb-4 flex items-baseline justify-between">
             <h2 className="text-lg font-semibold">
-              Movimientos{" "}
+              {t("movements")}{" "}
               <span className="text-sm font-normal text-neutral-400">
                 ({expenses.length})
               </span>
@@ -111,9 +114,7 @@ export default async function ExpensesPage({
           </div>
 
           {expenses.length === 0 ? (
-            <p className="text-sm text-neutral-400">
-              No hay gastos con estos filtros.
-            </p>
+            <p className="text-sm text-neutral-400">{t("emptyFiltered")}</p>
           ) : (
             <ul className="space-y-2">
               {expenses.map((e) => (

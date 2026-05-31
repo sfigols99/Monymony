@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { type Expense } from "@/lib/expenses";
 import { deleteExpense } from "@/app/expenses/actions";
 import { formatEuro } from "@/lib/format";
 import { ExpenseForm, type ExpenseOption } from "./ExpenseForm";
 
-/** Short date like "12 may" for the es-ES locale. */
-function shortDate(iso: string) {
+/** Short date like "12 may" formatted for the given locale. */
+function shortDate(iso: string, locale: string) {
   const d = new Date(iso + "T00:00:00");
-  return new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(d);
+  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }).format(d);
 }
 
 /** A single expense row with inline edit + delete. */
@@ -22,6 +23,9 @@ export function ExpenseItem({
   categories: ExpenseOption[];
   members: ExpenseOption[];
 }) {
+  const t = useTranslations("expenses");
+  const tc = useTranslations("common");
+  const locale = useLocale();
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
@@ -58,15 +62,15 @@ export function ExpenseItem({
         </span>
         <div className="min-w-0">
           <p className="truncate font-medium">
-            {expense.description || expense.categoryName || "Gasto"}
+            {expense.description || expense.categoryName || t("fallbackName")}
           </p>
           <p className="truncate text-xs text-neutral-400">
-            {shortDate(expense.expenseDate)}
+            {shortDate(expense.expenseDate, locale)}
             {expense.categoryName && ` · ${expense.categoryName}`}
             {expense.paidByName && ` · ${expense.paidByName}`}
             {expense.status === "pending" && (
               <span className="ml-1 rounded bg-amber-100 px-1 py-0.5 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-                pendiente
+                {t("pending")}
               </span>
             )}
           </p>
@@ -79,7 +83,7 @@ export function ExpenseItem({
           type="button"
           onClick={() => setEditing(true)}
           className="rounded-lg p-2 text-neutral-500 transition hover:bg-neutral-100 dark:hover:bg-neutral-800"
-          title="Editar"
+          title={tc("edit")}
         >
           <span className="material-symbols-rounded text-[20px]">edit</span>
         </button>
@@ -90,14 +94,14 @@ export function ExpenseItem({
               type="submit"
               className="rounded-lg bg-red-600 px-2 py-1 text-xs font-medium text-white transition hover:bg-red-700"
             >
-              Borrar
+              {tc("confirmDelete")}
             </button>
             <button
               type="button"
               onClick={() => setConfirming(false)}
               className="rounded-lg px-2 py-1 text-xs text-neutral-500 hover:underline"
             >
-              No
+              {tc("no")}
             </button>
           </form>
         ) : (
@@ -105,7 +109,7 @@ export function ExpenseItem({
             type="button"
             onClick={() => setConfirming(true)}
             className="rounded-lg p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-red-600 dark:hover:bg-neutral-800"
-            title="Borrar"
+            title={tc("delete")}
           >
             <span className="material-symbols-rounded text-[20px]">delete</span>
           </button>

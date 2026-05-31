@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { type Category } from "@/lib/categories";
 import { deleteCategory } from "@/app/categories/actions";
 import { formatEuro } from "@/lib/format";
@@ -8,6 +9,8 @@ import { CategoryForm } from "./CategoryForm";
 
 /** A single category row with inline edit + delete. */
 export function CategoryItem({ category }: { category: Category }) {
+  const t = useTranslations("categories");
+  const tc = useTranslations("common");
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
@@ -43,8 +46,8 @@ export function CategoryItem({ category }: { category: Category }) {
           <p className="font-medium">{category.name}</p>
           <p className="text-xs text-neutral-400">
             {category.monthlyLimit != null
-              ? `Límite ${formatEuro(category.monthlyLimit)}/mes`
-              : "Sin límite"}
+              ? t("limitLabel", { amount: formatEuro(category.monthlyLimit) })
+              : t("noLimit")}
           </p>
         </div>
       </div>
@@ -54,7 +57,7 @@ export function CategoryItem({ category }: { category: Category }) {
           type="button"
           onClick={() => setEditing(true)}
           className="rounded-lg p-2 text-neutral-500 transition hover:bg-neutral-100 dark:hover:bg-neutral-800"
-          title="Editar"
+          title={tc("edit")}
         >
           <span className="material-symbols-rounded text-[20px]">edit</span>
         </button>
@@ -65,14 +68,14 @@ export function CategoryItem({ category }: { category: Category }) {
               type="submit"
               className="rounded-lg bg-red-600 px-2 py-1 text-xs font-medium text-white transition hover:bg-red-700"
             >
-              Borrar
+              {tc("confirmDelete")}
             </button>
             <button
               type="button"
               onClick={() => setConfirming(false)}
               className="rounded-lg px-2 py-1 text-xs text-neutral-500 hover:underline"
             >
-              No
+              {tc("no")}
             </button>
           </form>
         ) : (
@@ -80,7 +83,7 @@ export function CategoryItem({ category }: { category: Category }) {
             type="button"
             onClick={() => setConfirming(true)}
             className="rounded-lg p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-red-600 dark:hover:bg-neutral-800"
-            title="Borrar"
+            title={tc("delete")}
           >
             <span className="material-symbols-rounded text-[20px]">delete</span>
           </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { updateSalary, type ActionState } from "@/app/household/actions";
 
 export function SalaryForm({
@@ -10,6 +11,8 @@ export function SalaryForm({
   householdId: string;
   currentSalary: number;
 }) {
+  const t = useTranslations("salary");
+  const tc = useTranslations("common");
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     updateSalary,
     null,
@@ -20,7 +23,7 @@ export function SalaryForm({
       <input type="hidden" name="household_id" value={householdId} />
       <div>
         <label htmlFor="salary" className="mb-1 block text-sm font-medium">
-          Tu salario mensual (€)
+          {t("label")}
         </label>
         <input
           id="salary"
@@ -38,7 +41,7 @@ export function SalaryForm({
         disabled={pending}
         className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
       >
-        {pending ? "Guardando…" : "Guardar"}
+        {pending ? tc("saving") : tc("save")}
       </button>
       {state?.error && <p className="w-full text-sm text-red-600">{state.error}</p>}
     </form>

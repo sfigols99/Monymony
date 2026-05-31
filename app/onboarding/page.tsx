@@ -1,13 +1,16 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   createHousehold,
   joinHousehold,
   type ActionState,
 } from "@/app/household/actions";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 export default function OnboardingPage() {
+  const t = useTranslations("onboarding");
   const [mode, setMode] = useState<"create" | "join">("create");
 
   const [createState, createAction, creating] = useActionState<
@@ -23,10 +26,11 @@ export default function OnboardingPage() {
     <main className="flex min-h-dvh items-center justify-center bg-neutral-50 p-4 dark:bg-neutral-950">
       <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">¡Bienvenido/a!</h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Crea un hogar o únete a uno con un código de invitación.
-          </p>
+          <div className="mb-3 flex justify-end">
+            <LocaleSwitcher />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">{t("welcome")}</h1>
+          <p className="mt-1 text-sm text-neutral-500">{t("subtitle")}</p>
         </div>
 
         <div className="mb-6 grid grid-cols-2 rounded-lg bg-neutral-100 p-1 text-sm font-medium dark:bg-neutral-800">
@@ -39,7 +43,7 @@ export default function OnboardingPage() {
                 : "text-neutral-500"
             }`}
           >
-            Crear hogar
+            {t("createTab")}
           </button>
           <button
             type="button"
@@ -50,7 +54,7 @@ export default function OnboardingPage() {
                 : "text-neutral-500"
             }`}
           >
-            Unirme
+            {t("joinTab")}
           </button>
         </div>
 
@@ -58,14 +62,14 @@ export default function OnboardingPage() {
           <form action={createAction} className="space-y-4">
             <div>
               <label htmlFor="name" className="mb-1 block text-sm font-medium">
-                Nombre del hogar
+                {t("householdName")}
               </label>
               <input
                 id="name"
                 name="name"
                 type="text"
                 required
-                placeholder="Casa de la playa"
+                placeholder={t("householdNamePlaceholder")}
                 className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
               />
             </div>
@@ -77,14 +81,14 @@ export default function OnboardingPage() {
               disabled={creating}
               className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
             >
-              {creating ? "Creando…" : "Crear hogar"}
+              {creating ? t("creating") : t("create")}
             </button>
           </form>
         ) : (
           <form action={joinAction} className="space-y-4">
             <div>
               <label htmlFor="code" className="mb-1 block text-sm font-medium">
-                Código de invitación
+                {t("inviteCode")}
               </label>
               <input
                 id="code"
@@ -104,7 +108,7 @@ export default function OnboardingPage() {
               disabled={joining}
               className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
             >
-              {joining ? "Uniéndome…" : "Unirme al hogar"}
+              {joining ? t("joining") : t("join")}
             </button>
           </form>
         )}

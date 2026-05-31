@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   createCategory,
   updateCategory,
@@ -29,6 +30,8 @@ export function CategoryForm({
   initial?: CategoryInitial;
   onDone?: () => void;
 }) {
+  const t = useTranslations("categories");
+  const tc = useTranslations("common");
   const editing = Boolean(initial);
   const action = editing ? updateCategory : createCategory;
   const [state, formAction, pending] = useActionState<
@@ -66,7 +69,7 @@ export function CategoryForm({
         </span>
         <div className="flex-1">
           <label htmlFor="cat-name" className="mb-1 block text-sm font-medium">
-            Nombre del concepto
+            {t("name")}
           </label>
           <input
             id="cat-name"
@@ -75,26 +78,26 @@ export function CategoryForm({
             required
             maxLength={50}
             defaultValue={initial?.name ?? ""}
-            placeholder="Supermercado"
+            placeholder={t("namePlaceholder")}
             className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
           />
         </div>
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium">Color</label>
+        <label className="mb-1.5 block text-sm font-medium">{t("color")}</label>
         <ColorPicker value={color} onChange={setColor} colors={CATEGORY_COLORS} />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium">Icono</label>
+        <label className="mb-1.5 block text-sm font-medium">{t("icon")}</label>
         <IconPicker value={icon} onChange={setIcon} color={color} />
       </div>
 
       <div>
         <label htmlFor="cat-limit" className="mb-1 block text-sm font-medium">
-          Límite mensual (€){" "}
-          <span className="font-normal text-neutral-400">— opcional</span>
+          {t("monthlyLimit")}{" "}
+          <span className="font-normal text-neutral-400">— {tc("optional")}</span>
         </label>
         <input
           id="cat-limit"
@@ -103,7 +106,7 @@ export function CategoryForm({
           min={0}
           step="0.01"
           defaultValue={initial?.monthlyLimit ?? ""}
-          placeholder="Sin límite"
+          placeholder={t("noLimit")}
           className="w-40 rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
         />
       </div>
@@ -119,10 +122,10 @@ export function CategoryForm({
           className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
         >
           {pending
-            ? "Guardando…"
+            ? tc("saving")
             : editing
-              ? "Guardar cambios"
-              : "Crear concepto"}
+              ? tc("saveChanges")
+              : t("create")}
         </button>
         {editing && onDone && (
           <button
@@ -130,7 +133,7 @@ export function CategoryForm({
             onClick={onDone}
             className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
           >
-            Cancelar
+            {tc("cancel")}
           </button>
         )}
       </div>

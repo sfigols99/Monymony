@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getActiveHousehold } from "@/lib/household";
 import { getMonthlyBudget, normalizePeriod } from "@/lib/budget";
 import { formatEuro, formatPercent } from "@/lib/format";
@@ -15,6 +16,8 @@ export default async function BudgetPage({
   if (!household) {
     redirect("/onboarding");
   }
+
+  const t = await getTranslations("budget");
 
   const sp = await searchParams;
   const { year, month } = normalizePeriod(
@@ -38,10 +41,8 @@ export default async function BudgetPage({
           <Link href="/" className="text-sm text-neutral-500 hover:text-indigo-600">
             ← {household.name}
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight">Presupuesto</h1>
-          <p className="text-sm text-neutral-500">
-            Planificación mensual del hogar.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-sm text-neutral-500">{t("subtitle")}</p>
         </div>
         <MonthNav year={year} month={month} />
       </header>
@@ -50,25 +51,25 @@ export default async function BudgetPage({
       <section className="mb-6 rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm text-neutral-500">Presupuesto del mes</p>
+            <p className="text-sm text-neutral-500">{t("monthBudget")}</p>
             <p className="text-3xl font-bold">{formatEuro(budget.plannedTotal)}</p>
             <p className="mt-1 text-xs text-neutral-400">
               {budget.isManual ? (
                 <span className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-                  manual
+                  {t("manual")}
                 </span>
               ) : (
-                "derivado de los salarios"
+                t("fromSalaries")
               )}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-neutral-500">Gastado</p>
+            <p className="text-sm text-neutral-500">{t("spent")}</p>
             <p className="text-xl font-semibold">{formatEuro(budget.spent)}</p>
             <p className={`mt-1 text-sm font-medium ${over ? "text-red-600" : "text-neutral-500"}`}>
               {over
-                ? `${formatEuro(Math.abs(budget.remaining))} de más`
-                : `${formatEuro(budget.remaining)} disponible`}
+                ? t("over", { amount: formatEuro(Math.abs(budget.remaining)) })
+                : t("available", { amount: formatEuro(budget.remaining) })}
             </p>
           </div>
         </div>
@@ -80,16 +81,15 @@ export default async function BudgetPage({
           />
         </div>
         <p className="mt-1 text-right text-xs text-neutral-400">
-          {formatPercent(budget.usedPercent)} usado
+          {t("used", { percent: formatPercent(budget.usedPercent) })}
         </p>
       </section>
 
       {/* Manual override */}
       <section className="mb-6 rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
-        <h2 className="mb-1 text-lg font-semibold">Ajustar presupuesto</h2>
+        <h2 className="mb-1 text-lg font-semibold">{t("adjustTitle")}</h2>
         <p className="mb-4 text-sm text-neutral-500">
-          Por defecto es la suma de salarios ({formatEuro(budget.salaryBudget)}).
-          Puedes fijar un importe manual para este mes.
+          {t("adjustHint", { amount: formatEuro(budget.salaryBudget) })}
         </p>
         <BudgetForm
           year={year}
@@ -102,11 +102,9 @@ export default async function BudgetPage({
 
       {/* Contributions per member */}
       <section className="mb-6 rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
-        <h2 className="mb-4 text-lg font-semibold">Aportación por miembro</h2>
+        <h2 className="mb-4 text-lg font-semibold">{t("contributionsTitle")}</h2>
         {budget.salaryBudget === 0 ? (
-          <p className="text-sm text-neutral-400">
-            Añade los salarios de los miembros para repartir el presupuesto.
-          </p>
+          <p className="text-sm text-neutral-400">{t("contributionsEmpty")}</p>
         ) : (
           <ul className="space-y-3">
             {budget.contributions.map((c) => (
@@ -115,7 +113,9 @@ export default async function BudgetPage({
                   <span className="font-medium">
                     {c.name}
                     {c.isCurrentUser && (
-                      <span className="ml-2 text-xs text-neutral-400">(tú)</span>
+                      <span className="ml-2 text-xs text-neutral-400">
+                        {t("you")}
+                      </span>
                     )}
                   </span>
                   <span className="text-neutral-500">
@@ -139,11 +139,9 @@ export default async function BudgetPage({
 
       {/* Spend by category */}
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
-        <h2 className="mb-4 text-lg font-semibold">Gasto por concepto</h2>
+        <h2 className="mb-4 text-lg font-semibold">{t("byCategoryTitle")}</h2>
         {budget.spentByCategory.length === 0 ? (
-          <p className="text-sm text-neutral-400">
-            Aún no hay gastos confirmados este mes.
-          </p>
+          <p className="text-sm text-neutral-400">{t("byCategoryEmpty")}</p>
         ) : (
           <ul className="space-y-2">
             {budget.spentByCategory.map((c) => (

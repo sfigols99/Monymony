@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   setManualBudget,
   resetToSalaryBudget,
@@ -25,6 +26,8 @@ export function BudgetForm({
   plannedTotal: number;
   isManual: boolean;
 }) {
+  const t = useTranslations("budget");
+  const tc = useTranslations("common");
   const [state, formAction, pending] = useActionState<
     BudgetActionState,
     FormData
@@ -38,7 +41,7 @@ export function BudgetForm({
         <input type="hidden" name="month" value={month} />
         <div>
           <label htmlFor="total" className="mb-1 block text-sm font-medium">
-            Presupuesto manual (€)
+            {t("manualLabel")}
           </label>
           <input
             id="total"
@@ -57,14 +60,14 @@ export function BudgetForm({
           disabled={pending}
           className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
         >
-          {pending ? "Guardando…" : "Fijar presupuesto"}
+          {pending ? tc("saving") : t("setBudget")}
         </button>
         <button
           type="button"
           onClick={() => setValue(String(salaryBudget))}
           className="rounded-lg border border-neutral-300 px-3 py-2 text-sm font-medium transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
         >
-          Usar salarios ({formatEuro(salaryBudget)})
+          {t("useSalaries", { amount: formatEuro(salaryBudget) })}
         </button>
       </form>
 
@@ -77,7 +80,7 @@ export function BudgetForm({
           <input type="hidden" name="year" value={year} />
           <input type="hidden" name="month" value={month} />
           <button type="submit" className="text-sm text-neutral-500 hover:underline">
-            ↺ Volver al presupuesto por salarios
+            {t("revert")}
           </button>
         </form>
       )}

@@ -38,12 +38,13 @@ Objetivo de **coste 0** usando los planes gratuitos.
 - [ ] Vista de planificación mensual (presupuesto vs. gastado)
 - [ ] Reparto de aportaciones por miembro según porcentaje
 
-## Fase 3 — Conceptos (categorías)
+## Fase 3 — Conceptos (categorías) ✅
 
-- [ ] CRUD de conceptos por hogar (energía, supermercado, préstamos, impuestos, mascotas, electrodomésticos…)
-- [ ] Selector de **color**
-- [ ] Selector de **icono** desde catálogo de Google Material Symbols
-- [ ] Límite de gasto opcional por concepto
+- [x] CRUD de conceptos por hogar (energía, supermercado, préstamos, impuestos, mascotas, electrodomésticos…)
+- [x] Selector de **color** (paleta)
+- [x] Selector de **icono** desde catálogo de Google Material Symbols
+- [x] Límite de gasto opcional por concepto
+- [x] Página `/categories` con alta, edición inline y borrado
 
 ## Fase 4 — Gastos por formulario
 

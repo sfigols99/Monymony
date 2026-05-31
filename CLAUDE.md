@@ -56,8 +56,13 @@ There is no test runner configured yet.
 - **`lib/household.ts`** — `getActiveHousehold()` loads the user's first
   household with members and salary-derived contribution percentages. The home
   page (`app/page.tsx`) redirects to `/onboarding` when there's no household.
+- **Category actions** are Server Actions in `app/categories/actions.ts`
+  (`createCategory`, `updateCategory`, `deleteCategory`). The `/categories`
+  page lists + edits them inline. Icon/color catalogs live in `lib/icons.ts`
+  (`EXPENSE_ICONS`, `CATEGORY_COLORS`); `lib/categories.ts` has `getCategories`.
 - **`lib/format.ts`** — `formatEuro` / `formatPercent` (es-ES locale).
-- Client UI bits live in `components/` (`SalaryForm`, `InviteCode`).
+- Client UI bits live in `components/` (`SalaryForm`, `InviteCode`,
+  `CategoryForm`, `CategoryItem`, `IconPicker`, `ColorPicker`).
 - Prefer **Server Components** for data fetching and **Server Actions** for
   mutations. Reach for Client Components only when you need interactivity.
 - **Money** is stored as `numeric(12,2)` (euros) in Postgres. Format with the

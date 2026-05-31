@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getActiveHousehold } from "@/lib/household";
+import { getTriggeredAlerts } from "@/lib/alerts";
+import { normalizePeriod } from "@/lib/budget";
 import { formatEuro, formatPercent } from "@/lib/format";
 import { signOut } from "./login/actions";
 import { leaveHousehold } from "./household/actions";
 import { SalaryForm } from "@/components/SalaryForm";
 import { InviteCode } from "@/components/InviteCode";
+import { AlertBanner } from "@/components/AlertBanner";
 
 export default async function Home() {
   const household = await getActiveHousehold();
@@ -14,6 +17,9 @@ export default async function Home() {
   if (!household) {
     redirect("/onboarding");
   }
+
+  const { year, month } = normalizePeriod();
+  const triggered = await getTriggeredAlerts(household, year, month);
 
   const me = household.members.find((m) => m.userId === household.currentUserId);
 
@@ -33,6 +39,8 @@ export default async function Home() {
           </button>
         </form>
       </header>
+
+      <AlertBanner alerts={triggered} />
 
       {/* Budget base + invite code */}
       <section className="mb-6 grid gap-4 sm:grid-cols-2">
@@ -124,6 +132,20 @@ export default async function Home() {
           </div>
         </Link>
         <Link
+          href="/alerts"
+          className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-5 transition hover:border-indigo-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-indigo-700"
+        >
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300">
+            <span className="material-symbols-rounded">notifications</span>
+          </span>
+          <div>
+            <p className="font-medium">Alertas</p>
+            <p className="text-xs text-neutral-400">
+              Avisos cuando se gasta de más
+            </p>
+          </div>
+        </Link>
+        <Link
           href="/budget"
           className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-5 transition hover:border-indigo-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-indigo-700"
         >
@@ -155,7 +177,7 @@ export default async function Home() {
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
         <p className="text-sm text-neutral-500">
-          🚧 Siguiente: alertas de sobregasto y lectura de tickets por OCR
+          🚧 Siguiente: lectura de tickets por OCR y predicción de gastos
           (ver <code className="rounded bg-neutral-100 px-1 dark:bg-neutral-800">ROADMAP.md</code>).
         </p>
         <form action={leaveHousehold} className="mt-4">

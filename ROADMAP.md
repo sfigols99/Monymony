@@ -55,11 +55,12 @@ Objetivo de **coste 0** usando los planes gratuitos.
 - [x] Filtros (mes, concepto, miembro) y total filtrado
 - [x] Página `/expenses`; los gastos alimentan el presupuesto (Fase 2)
 
-## Fase 5 — Alertas
+## Fase 5 — Alertas ✅
 
-- [ ] Definir reglas de alerta (por % del presupuesto o importe absoluto)
-- [ ] Alertas globales y por concepto
-- [ ] Indicadores visuales + notificaciones cuando se supera el umbral
+- [x] Definir reglas de alerta (por % del presupuesto/límite o importe absoluto)
+- [x] Alertas globales (todo el hogar) y por concepto
+- [x] Activar/desactivar, editar y borrar alertas
+- [x] Indicadores visuales: banner de alertas disparadas en dashboard y `/alerts`
 
 ## Fase 6 — Gastos por foto de ticket (OCR)
 

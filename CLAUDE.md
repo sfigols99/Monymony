@@ -62,6 +62,13 @@ There is no test runner configured yet.
   `app/expenses/actions.ts` (`createExpense`, `updateExpense`, `deleteExpense`)
   validate with Zod, check the payer is a household member, and revalidate both
   `/expenses` and `/budget`. Form-sourced expenses are stored `confirmed`.
+- **Alerts** live at `/alerts`. `lib/alerts.ts` (`getAlerts`,
+  `getTriggeredAlerts`) evaluates active alerts against the current month:
+  whole-household (`category_id` null) or per-category, by `threshold_amount`
+  (absolute €) or `threshold_percent` (of the planned budget, or the category's
+  `monthly_limit`). Server Actions in `app/alerts/actions.ts` (`createAlert`,
+  `updateAlert`, `toggleAlert`, `deleteAlert`). `AlertBanner` shows triggered
+  alerts on the dashboard and `/alerts`.
 - **Budget** lives at `/budget`. `lib/budget.ts` (`getMonthlyBudget`,
   `normalizePeriod`, `formatPeriod`) builds the monthly snapshot: planned total
   (manual override from `monthly_budgets` or salary-derived), confirmed spend,

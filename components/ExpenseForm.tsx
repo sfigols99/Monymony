@@ -19,6 +19,13 @@ export type ExpenseInitial = {
   description: string | null;
 };
 
+/** Optional values to pre-fill a new expense (e.g. from a scanned receipt). */
+export type ExpensePrefill = {
+  amount?: number | null;
+  expenseDate?: string | null;
+  description?: string | null;
+};
+
 /** Today's date as YYYY-MM-DD in local time. */
 function todayIso() {
   const d = new Date();
@@ -33,11 +40,17 @@ export function ExpenseForm({
   categories,
   members,
   initial,
+  prefill,
+  source = "form",
+  receiptPath,
   onDone,
 }: {
   categories: ExpenseOption[];
   members: ExpenseOption[];
   initial?: ExpenseInitial;
+  prefill?: ExpensePrefill;
+  source?: "form" | "ticket";
+  receiptPath?: string | null;
   onDone?: () => void;
 }) {
   const t = useTranslations("expenses");
@@ -61,6 +74,10 @@ export function ExpenseForm({
   return (
     <form ref={formRef} action={formAction} className="space-y-4">
       {editing && <input type="hidden" name="id" value={initial!.id} />}
+      {!editing && <input type="hidden" name="source" value={source} />}
+      {!editing && receiptPath && (
+        <input type="hidden" name="receiptPath" value={receiptPath} />
+      )}
 
       <div className="flex flex-wrap gap-4">
         <div>
@@ -74,7 +91,7 @@ export function ExpenseForm({
             min={0}
             step="0.01"
             required
-            defaultValue={initial?.amount ?? ""}
+            defaultValue={initial?.amount ?? prefill?.amount ?? ""}
             placeholder="0,00"
             className="w-32 rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
           />
@@ -88,7 +105,7 @@ export function ExpenseForm({
             name="expenseDate"
             type="date"
             required
-            defaultValue={initial?.expenseDate ?? todayIso()}
+            defaultValue={initial?.expenseDate ?? prefill?.expenseDate ?? todayIso()}
             className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
           />
         </div>
@@ -143,7 +160,7 @@ export function ExpenseForm({
           name="description"
           type="text"
           maxLength={200}
-          defaultValue={initial?.description ?? ""}
+          defaultValue={initial?.description ?? prefill?.description ?? ""}
           placeholder={t("descriptionPlaceholder")}
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
         />

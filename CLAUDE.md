@@ -62,7 +62,22 @@ There is no test runner configured yet.
   `expenses_paid_by_fkey` embed) with category/payer filters. Server Actions in
   `app/expenses/actions.ts` (`createExpense`, `updateExpense`, `deleteExpense`)
   validate with Zod, check the payer is a household member, and revalidate both
-  `/expenses` and `/budget`. Form-sourced expenses are stored `confirmed`.
+  `/expenses` and `/budget`. `createExpense` also accepts `source`
+  (`form`/`ticket`) and `receiptPath`; expenses are stored `confirmed` (the user
+  reviews before saving — `pending` is reserved for a future automated provider).
+- **Receipt OCR** is **client-side and pluggable** (`lib/ocr/`): `OCRProvider`
+  interface (`types.ts`), EUR/es-ES parser (`parse.ts` → amount/date/merchant),
+  the default in-browser Tesseract.js provider (`tesseract.ts`, WASM/web worker,
+  dynamic-imported), and `index.ts`'s `getOCRProvider()` selector (env-swappable
+  for a future remote provider). UI: `components/ReceiptScanner.tsx` uploads the
+  image to the private `receipts` Storage bucket and OCRs it in the browser;
+  `components/NewExpense.tsx` wraps the scanner + `ExpenseForm`, seeding the form
+  via its `prefill`/`source`/`receiptPath` props (remounts on each scan with a
+  `key`). No OCR runs on the server — keeps Vercel free-tier cost at 0.
+- **Self-hosting:** `Dockerfile` builds a Next.js **standalone** image
+  (`output: "standalone"` in `next.config.ts`); `NEXT_PUBLIC_*` are build args.
+  `next.config.ts` also aliases `canvas`/`encoding` to `false` for the
+  tesseract.js browser bundle.
 - **Alerts** live at `/alerts`. `lib/alerts.ts` (`getAlerts`,
   `getTriggeredAlerts`) evaluates active alerts against the current month:
   whole-household (`category_id` null) or per-category, by `threshold_amount`
@@ -109,8 +124,13 @@ and add equivalent member-scoped policies. Co-member profile visibility uses
 `shares_household(user_id)`. Cross-table or pre-membership operations go through
 SECURITY DEFINER RPCs (see `0002_households_invites.sql`).
 
+`0003_receipts_storage.sql` adds the private `receipts` Storage bucket with
+member-scoped RLS on `storage.objects` (objects are laid out as
+`{household_id}/{file}`; the leading folder is checked with
+`is_household_member`).
+
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`).
+(`0001…`, `0002…`, `0003…`).
 
 ## Environment
 

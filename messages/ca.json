@@ -128,7 +128,16 @@
     "clearFilters": "Neteja els filtres",
     "emptyFiltered": "No hi ha despeses amb aquests filtres.",
     "pending": "pendent",
-    "fallbackName": "Despesa"
+    "fallbackName": "Despesa",
+    "scan": {
+      "hint": "Fes una foto del tiquet i omplim la despesa per tu. Revisa-la abans de desar.",
+      "choose": "Fes una foto o puja una imatge",
+      "uploading": "Pujant la imatge…",
+      "reading": "Llegint el tiquet… {percent}%",
+      "detected": "Dades detectades del tiquet. Revisa-les abans de desar.",
+      "retake": "Fes servir una altra imatge",
+      "or": "o introdueix-la a mà"
+    }
   },
   "alerts": {
     "title": "Alertes",
@@ -179,6 +188,8 @@
     "invalidCredentials": "Correu o contrasenya incorrectes.",
     "emailInUse": "Aquest correu ja està registrat.",
     "emailNotConfirmed": "Confirma el teu correu abans d'iniciar la sessió.",
-    "passwordTooShort": "La contrasenya ha de tenir almenys 6 caràcters."
+    "passwordTooShort": "La contrasenya ha de tenir almenys 6 caràcters.",
+    "uploadFailed": "No s'ha pogut pujar la imatge. Torna-ho a provar.",
+    "ocrFailed": "No s'ha pogut llegir el tiquet. Prova amb una altra foto o introdueix-la a mà."
   }
 }

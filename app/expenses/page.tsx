@@ -6,7 +6,8 @@ import { getCategories } from "@/lib/categories";
 import { getExpenses } from "@/lib/expenses";
 import { normalizePeriod, formatPeriod } from "@/lib/budget";
 import { formatEuro } from "@/lib/format";
-import { ExpenseForm, type ExpenseOption } from "@/components/ExpenseForm";
+import { type ExpenseOption } from "@/components/ExpenseForm";
+import { NewExpense } from "@/components/NewExpense";
 import { ExpenseItem } from "@/components/ExpenseItem";
 import { ExpenseFilters } from "@/components/ExpenseFilters";
 
@@ -87,7 +88,11 @@ export default async function ExpensesPage({
               </Link>
             </p>
           )}
-          <ExpenseForm categories={categoryOptions} members={memberOptions} />
+          <NewExpense
+            categories={categoryOptions}
+            members={memberOptions}
+            householdId={household.id}
+          />
         </section>
 
         {/* List + filters */}

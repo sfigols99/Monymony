@@ -48,11 +48,12 @@ Objetivo de **coste 0** usando los planes gratuitos.
 - [x] Límite de gasto opcional por concepto
 - [x] Página `/categories` con alta, edición inline y borrado
 
-## Fase 4 — Gastos por formulario
+## Fase 4 — Gastos por formulario ✅
 
-- [ ] Alta de gasto: importe (€), concepto, fecha, pagado por, descripción
-- [ ] Listado, edición y borrado de gastos
-- [ ] Filtros (mes, concepto, miembro) y totales
+- [x] Alta de gasto: importe (€), concepto, fecha, pagado por, descripción
+- [x] Listado, edición y borrado de gastos (inline)
+- [x] Filtros (mes, concepto, miembro) y total filtrado
+- [x] Página `/expenses`; los gastos alimentan el presupuesto (Fase 2)
 
 ## Fase 5 — Alertas
 

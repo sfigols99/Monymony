@@ -110,6 +110,20 @@ export default async function Home() {
       {/* Quick navigation to household features */}
       <section className="mb-6 grid gap-3 sm:grid-cols-2">
         <Link
+          href="/expenses"
+          className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-5 transition hover:border-indigo-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-indigo-700"
+        >
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300">
+            <span className="material-symbols-rounded">receipt_long</span>
+          </span>
+          <div>
+            <p className="font-medium">Gastos</p>
+            <p className="text-xs text-neutral-400">
+              Registra y consulta los gastos del hogar
+            </p>
+          </div>
+        </Link>
+        <Link
           href="/budget"
           className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-5 transition hover:border-indigo-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-indigo-700"
         >
@@ -141,7 +155,7 @@ export default async function Home() {
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
         <p className="text-sm text-neutral-500">
-          🚧 Siguiente: registro de gastos y alertas
+          🚧 Siguiente: alertas de sobregasto y lectura de tickets por OCR
           (ver <code className="rounded bg-neutral-100 px-1 dark:bg-neutral-800">ROADMAP.md</code>).
         </p>
         <form action={leaveHousehold} className="mt-4">

@@ -56,6 +56,12 @@ There is no test runner configured yet.
 - **`lib/household.ts`** — `getActiveHousehold()` loads the user's first
   household with members and salary-derived contribution percentages. The home
   page (`app/page.tsx`) redirects to `/onboarding` when there's no household.
+- **Expenses** live at `/expenses`. `lib/expenses.ts` (`getExpenses`) lists a
+  month's expenses (joined with category + payer profile via the
+  `expenses_paid_by_fkey` embed) with category/payer filters. Server Actions in
+  `app/expenses/actions.ts` (`createExpense`, `updateExpense`, `deleteExpense`)
+  validate with Zod, check the payer is a household member, and revalidate both
+  `/expenses` and `/budget`. Form-sourced expenses are stored `confirmed`.
 - **Budget** lives at `/budget`. `lib/budget.ts` (`getMonthlyBudget`,
   `normalizePeriod`, `formatPeriod`) builds the monthly snapshot: planned total
   (manual override from `monthly_budgets` or salary-derived), confirmed spend,

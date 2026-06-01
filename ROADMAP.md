@@ -35,6 +35,8 @@ Objetivo de **coste 0** usando los planes gratuitos.
 
 - [x] Presupuesto derivado de la suma de salarios
 - [x] Override **manual** del presupuesto por mes (con reset a salarios)
+- [x] Presupuesto **fijo recurrente**: importe fijo aplicado a todos los meses
+  siguientes (distinto del salario); prioridad override-mes > fijo > salarios
 - [x] Vista de planificación mensual (presupuesto vs. gastado) con navegación por meses
 - [x] Reparto de aportaciones por miembro según porcentaje
 - [x] Gasto agrupado por concepto en el mes

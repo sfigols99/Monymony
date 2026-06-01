@@ -54,9 +54,13 @@ export default async function BudgetPage({
             <p className="text-sm text-neutral-500">{t("monthBudget")}</p>
             <p className="text-3xl font-bold">{formatEuro(budget.plannedTotal)}</p>
             <p className="mt-1 text-xs text-neutral-400">
-              {budget.isManual ? (
+              {budget.source === "manual" ? (
                 <span className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
                   {t("manual")}
+                </span>
+              ) : budget.source === "recurring" ? (
+                <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                  {t("recurring")}
                 </span>
               ) : (
                 t("fromSalaries")
@@ -97,6 +101,7 @@ export default async function BudgetPage({
           salaryBudget={budget.salaryBudget}
           plannedTotal={budget.plannedTotal}
           isManual={budget.isManual}
+          recurringBudget={budget.recurringBudget}
         />
       </section>
 

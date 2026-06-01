@@ -70,13 +70,20 @@ There is no test runner configured yet.
   `monthly_limit`). Server Actions in `app/alerts/actions.ts` (`createAlert`,
   `updateAlert`, `toggleAlert`, `deleteAlert`). `AlertBanner` shows triggered
   alerts on the dashboard and `/alerts`.
-- **Budget** lives at `/budget`. `lib/budget.ts` (`getMonthlyBudget`,
-  `normalizePeriod`, `formatPeriod`) builds the monthly snapshot: planned total
-  (manual override from `monthly_budgets` or salary-derived), confirmed spend,
-  remaining, per-member contributions and spend-by-category. Server Actions in
-  `app/budget/actions.ts` (`setManualBudget` upserts an override,
-  `resetToSalaryBudget` deletes it). The page takes `?year=&month=` search
-  params; `MonthNav` switches months.
+- **Budget** lives at `/budget`. `lib/budget.ts` (`getMonthlyBudget`) builds the
+  monthly snapshot: the planned total is resolved by priority — per-month manual
+  override (`monthly_budgets.is_manual`) → household recurring fixed budget
+  (`recurring_budgets`, if the month ≥ `effective_from`) → salary-derived —
+  exposed as `source: "manual" | "recurring" | "salary"` plus `recurringBudget`.
+  Confirmed spend, remaining, per-member contributions and spend-by-category too.
+  Server Actions in `app/budget/actions.ts`: `setBudget` (scope `"month"` upserts
+  a `monthly_budgets` override, scope `"forward"` upserts the household
+  `recurring_budgets` row from that month on), `resetToSalaryBudget` (drops the
+  month override), `clearRecurringBudget` (drops the recurring one). The page
+  takes `?year=&month=`; `MonthNav` switches months. **Pure period helpers
+  (`normalizePeriod`, `formatPeriod`) live in `lib/period.ts`** (no server
+  imports) so Client Components can use them; `lib/budget.ts` re-exports them for
+  server callers.
 - **Category actions** are Server Actions in `app/categories/actions.ts`
   (`createCategory`, `updateCategory`, `deleteCategory`). The `/categories`
   page lists + edits them inline. Icon/color catalogs live in `lib/icons.ts`
@@ -109,8 +116,12 @@ and add equivalent member-scoped policies. Co-member profile visibility uses
 `shares_household(user_id)`. Cross-table or pre-membership operations go through
 SECURITY DEFINER RPCs (see `0002_households_invites.sql`).
 
+`0004_recurring_budget.sql` adds the `recurring_budgets` table (one fixed budget
+per household, applied from `effective_from` onward), member-scoped. (`0003` is
+reserved by the in-flight receipts-storage branch, hence the gap here.)
+
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`).
+(`0001…`, `0002…`, `0004…`).
 
 ## Environment
 

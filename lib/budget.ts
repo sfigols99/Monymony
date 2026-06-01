@@ -1,5 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActiveHousehold, type ActiveHousehold } from "@/lib/household";
+import { normalizePeriod, formatPeriod } from "@/lib/period";
+
+// Re-exported so existing server-side imports (`from "@/lib/budget"`) keep
+// working. Client Components must import these from "@/lib/period" instead.
+export { normalizePeriod, formatPeriod };
 
 export type MemberContribution = {
   userId: string;
@@ -17,15 +22,29 @@ export type SpentByCategory = {
   spent: number;
 };
 
+/** Where the effective planned budget comes from, in priority order. */
+export type BudgetSource = "manual" | "recurring" | "salary";
+
+/** A household-wide fixed budget that applies from a given month onward. */
+export type RecurringBudget = {
+  amount: number;
+  fromYear: number;
+  fromMonth: number;
+};
+
 export type MonthlyBudget = {
   year: number;
   month: number;
   /** Sum of member salaries — the automatic budget base. */
   salaryBudget: number;
-  /** The planned total actually in effect (manual override or salaryBudget). */
+  /** The planned total actually in effect. */
   plannedTotal: number;
-  /** True when a manual override is stored for this month. */
+  /** What the planned total is derived from for this month. */
+  source: BudgetSource;
+  /** True when a per-month manual override is stored for this month. */
   isManual: boolean;
+  /** The household's recurring fixed budget, if any (regardless of this month). */
+  recurringBudget: RecurringBudget | null;
   /** Total confirmed spending this month. */
   spent: number;
   remaining: number;
@@ -34,27 +53,6 @@ export type MonthlyBudget = {
   contributions: MemberContribution[];
   spentByCategory: SpentByCategory[];
 };
-
-/** Clamp a possibly-invalid month/year to a sane range, defaulting to now. */
-export function normalizePeriod(year?: number, month?: number) {
-  const now = new Date();
-  const y = Number.isFinite(year) && year! >= 2000 && year! <= 2100 ? year! : now.getFullYear();
-  const m = Number.isFinite(month) && month! >= 1 && month! <= 12 ? month! : now.getMonth() + 1;
-  return { year: y, month: m };
-}
-
-/** "mayo de 2026" / "May 2026" / "maig de 2026" — formatted for the locale. */
-export function formatPeriod(
-  year: number,
-  month: number,
-  locale = "es",
-): string {
-  const d = new Date(year, month - 1, 1);
-  return new Intl.DateTimeFormat(locale, {
-    month: "long",
-    year: "numeric",
-  }).format(d);
-}
 
 function monthRange(year: number, month: number) {
   const start = `${year}-${String(month).padStart(2, "0")}-01`;
@@ -75,7 +73,7 @@ export async function getMonthlyBudget(
 ): Promise<MonthlyBudget> {
   const supabase = await createClient();
 
-  // Stored override (if any) for this period.
+  // Per-month manual override (if any) for this period.
   const { data: stored } = await supabase
     .from("monthly_budgets")
     .select("total_amount, is_manual")
@@ -84,9 +82,40 @@ export async function getMonthlyBudget(
     .eq("month", month)
     .maybeSingle();
 
+  // Household-wide recurring fixed budget (if any).
+  const { data: recurring } = await supabase
+    .from("recurring_budgets")
+    .select("amount, effective_from")
+    .eq("household_id", household.id)
+    .maybeSingle();
+
   const salaryBudget = household.totalSalaries;
-  const isManual = Boolean(stored?.is_manual);
-  const plannedTotal = isManual ? Number(stored!.total_amount) || 0 : salaryBudget;
+
+  let recurringBudget: RecurringBudget | null = null;
+  let recurringApplies = false;
+  if (recurring) {
+    const ef = new Date(recurring.effective_from as string); // YYYY-MM-DD (UTC)
+    const fromYear = ef.getUTCFullYear();
+    const fromMonth = ef.getUTCMonth() + 1;
+    recurringBudget = { amount: Number(recurring.amount) || 0, fromYear, fromMonth };
+    recurringApplies =
+      year * 12 + (month - 1) >= fromYear * 12 + (fromMonth - 1);
+  }
+
+  // Resolve the effective budget: per-month manual > recurring fixed > salary.
+  let source: BudgetSource;
+  let plannedTotal: number;
+  if (stored?.is_manual) {
+    source = "manual";
+    plannedTotal = Number(stored.total_amount) || 0;
+  } else if (recurringBudget && recurringApplies) {
+    source = "recurring";
+    plannedTotal = recurringBudget.amount;
+  } else {
+    source = "salary";
+    plannedTotal = salaryBudget;
+  }
+  const isManual = source === "manual";
 
   // Confirmed expenses in the period, joined with their category.
   const { start, end } = monthRange(year, month);
@@ -145,7 +174,9 @@ export async function getMonthlyBudget(
     month,
     salaryBudget,
     plannedTotal,
+    source,
     isManual,
+    recurringBudget,
     spent,
     remaining: plannedTotal - spent,
     usedPercent: plannedTotal > 0 ? (spent / plannedTotal) * 100 : 0,

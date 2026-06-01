@@ -1,8 +1,9 @@
 @import "tailwindcss";
-/* Google Material Symbols — variable icon font used by the category icon picker.
-   Imported here (not via a <link>/next-font) so it loads globally without
-   tripping the page-custom-font lint rules. */
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block");
+
+/* Google Material Symbols are loaded via a <link> in app/layout.tsx, not a CSS
+   @import here: after Tailwind v4 expands its own import into rules, a following
+   @import is no longer at the top of the bundle and browsers ignore it (so the
+   icons would render as plain text). */
 
 :root {
   --background: #ffffff;

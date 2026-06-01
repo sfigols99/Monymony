@@ -124,13 +124,14 @@ and add equivalent member-scoped policies. Co-member profile visibility uses
 `shares_household(user_id)`. Cross-table or pre-membership operations go through
 SECURITY DEFINER RPCs (see `0002_households_invites.sql`).
 
-`0003_receipts_storage.sql` adds the private `receipts` Storage bucket with
+`0004_receipts_storage.sql` adds the private `receipts` Storage bucket with
 member-scoped RLS on `storage.objects` (objects are laid out as
 `{household_id}/{file}`; the leading folder is checked with
-`is_household_member`).
+`is_household_member`). (`0003` is the recurring-budget migration on the budget
+branch, hence the gap here.)
 
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`, `0003…`).
+(`0001…`, `0002…`, `0004…`).
 
 ## Environment
 

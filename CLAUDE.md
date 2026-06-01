@@ -116,12 +116,11 @@ and add equivalent member-scoped policies. Co-member profile visibility uses
 `shares_household(user_id)`. Cross-table or pre-membership operations go through
 SECURITY DEFINER RPCs (see `0002_households_invites.sql`).
 
-`0004_recurring_budget.sql` adds the `recurring_budgets` table (one fixed budget
-per household, applied from `effective_from` onward), member-scoped. (`0003` is
-reserved by the in-flight receipts-storage branch, hence the gap here.)
+`0003_recurring_budget.sql` adds the `recurring_budgets` table (one fixed budget
+per household, applied from `effective_from` onward), member-scoped.
 
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`, `0004…`).
+(`0001…`, `0002…`, `0003…`).
 
 ## Environment
 

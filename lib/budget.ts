@@ -25,12 +25,22 @@ export type SpentByCategory = {
 /** How a budget's amount is divided among household members. */
 export type BudgetSplit = "equal" | "proportional";
 
+/** One member's share of a budget. */
+export type BudgetShare = {
+  userId: string;
+  name: string;
+  amount: number; // euros
+  isCurrentUser: boolean;
+};
+
 /** A named recurring budget (e.g. "Hipoteca", "Súper"). */
 export type Budget = {
   id: string;
   name: string;
   amount: number;
   split: BudgetSplit;
+  /** Per-member breakdown for this budget's amount, by its split method. */
+  shares: BudgetShare[];
 };
 
 /** Where the effective planned total comes from, in priority order. */
@@ -93,15 +103,38 @@ export async function getMonthlyBudget(
     .eq("household_id", household.id)
     .order("created_at", { ascending: true });
 
-  const budgets: Budget[] = (budgetRows ?? []).map((r) => ({
+  const budgetDefs = (budgetRows ?? []).map((r) => ({
     id: r.id as string,
     name: r.name as string,
     amount: Number(r.amount) || 0,
-    split: r.split === "equal" ? "equal" : "proportional",
+    split: (r.split === "equal" ? "equal" : "proportional") as BudgetSplit,
   }));
-  const budgetsTotal = budgets.reduce((sum, b) => sum + b.amount, 0);
+  const budgetsTotal = budgetDefs.reduce((sum, b) => sum + b.amount, 0);
 
   const salaryBudget = household.totalSalaries;
+  const members = household.members;
+  const memberCount = members.length || 1;
+
+  /** Split an amount across members by the given method. */
+  const shareOf = (amount: number, split: BudgetSplit): BudgetShare[] =>
+    members.map((m) => {
+      // Fall back to an equal split when there are no salaries to weigh by.
+      const amt =
+        split === "equal" || salaryBudget <= 0
+          ? amount / memberCount
+          : (m.monthlySalary / salaryBudget) * amount;
+      return {
+        userId: m.userId,
+        name: m.fullName || m.email || "—",
+        amount: amt,
+        isCurrentUser: m.userId === household.currentUserId,
+      };
+    });
+
+  const budgets: Budget[] = budgetDefs.map((b) => ({
+    ...b,
+    shares: shareOf(b.amount, b.split),
+  }));
 
   // Resolve the effective total: per-month manual override > named budgets > salary.
   let source: BudgetSource;
@@ -160,32 +193,16 @@ export async function getMonthlyBudget(
     }
   }
 
-  // Per-member contributions. Each budget is split by its own method; "manual"
-  // and "salary" totals are treated as a single proportional budget.
-  const members = household.members;
-  const memberCount = members.length || 1;
+  // Per-member contributions: sum each member's share across all budgets.
+  // "manual"/"salary" totals are treated as a single proportional budget.
+  const aggregateShares =
+    source === "budgets"
+      ? budgets.flatMap((b) => b.shares)
+      : shareOf(plannedTotal, "proportional");
+
   const totalsByUser = new Map<string, number>(members.map((m) => [m.userId, 0]));
-
-  const addShares = (amount: number, split: BudgetSplit) => {
-    if (amount <= 0) return;
-    // Fall back to an equal split if there are no salaries to weigh by.
-    if (split === "equal" || salaryBudget <= 0) {
-      const per = amount / memberCount;
-      for (const m of members) {
-        totalsByUser.set(m.userId, (totalsByUser.get(m.userId) ?? 0) + per);
-      }
-    } else {
-      for (const m of members) {
-        const share = (m.monthlySalary / salaryBudget) * amount;
-        totalsByUser.set(m.userId, (totalsByUser.get(m.userId) ?? 0) + share);
-      }
-    }
-  };
-
-  if (source === "budgets") {
-    for (const b of budgets) addShares(b.amount, b.split);
-  } else {
-    addShares(plannedTotal, "proportional");
+  for (const s of aggregateShares) {
+    totalsByUser.set(s.userId, (totalsByUser.get(s.userId) ?? 0) + s.amount);
   }
 
   const contributions: MemberContribution[] = members.map((m) => {

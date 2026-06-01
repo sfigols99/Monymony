@@ -5,6 +5,8 @@ import { getActiveHousehold } from "@/lib/household";
 import { getMonthlyBudget, normalizePeriod } from "@/lib/budget";
 import { formatEuro, formatPercent } from "@/lib/format";
 import { BudgetForm } from "@/components/BudgetForm";
+import { BudgetLineForm } from "@/components/BudgetLineForm";
+import { BudgetItem } from "@/components/BudgetItem";
 import { MonthNav } from "@/components/MonthNav";
 
 export default async function BudgetPage({
@@ -58,9 +60,9 @@ export default async function BudgetPage({
                 <span className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
                   {t("manual")}
                 </span>
-              ) : budget.source === "recurring" ? (
+              ) : budget.source === "budgets" ? (
                 <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
-                  {t("recurring")}
+                  {t("fromBudgets")}
                 </span>
               ) : (
                 t("fromSalaries")
@@ -89,26 +91,45 @@ export default async function BudgetPage({
         </p>
       </section>
 
-      {/* Manual override */}
+      {/* Named budgets manager */}
+      <section className="mb-6 rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
+        <h2 className="mb-1 text-lg font-semibold">{t("budgetsTitle")}</h2>
+        <p className="mb-4 text-sm text-neutral-500">{t("budgetsSubtitle")}</p>
+
+        {budget.budgets.length > 0 && (
+          <ul className="mb-4 space-y-2">
+            {budget.budgets.map((b) => (
+              <BudgetItem key={b.id} budget={b} />
+            ))}
+          </ul>
+        )}
+        {budget.budgets.length === 0 && (
+          <p className="mb-4 text-sm text-neutral-400">{t("budgetsEmpty")}</p>
+        )}
+
+        <div className="rounded-xl border border-dashed border-neutral-300 p-4 dark:border-neutral-700">
+          <h3 className="mb-3 text-sm font-semibold">{t("newBudget")}</h3>
+          <BudgetLineForm />
+        </div>
+      </section>
+
+      {/* Per-month override (an exception on top of the budgets/salary base) */}
       <section className="mb-6 rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
         <h2 className="mb-1 text-lg font-semibold">{t("adjustTitle")}</h2>
-        <p className="mb-4 text-sm text-neutral-500">
-          {t("adjustHint", { amount: formatEuro(budget.salaryBudget) })}
-        </p>
+        <p className="mb-4 text-sm text-neutral-500">{t("adjustHintMonth")}</p>
         <BudgetForm
           year={year}
           month={month}
           salaryBudget={budget.salaryBudget}
           plannedTotal={budget.plannedTotal}
           isManual={budget.isManual}
-          recurringBudget={budget.recurringBudget}
         />
       </section>
 
       {/* Contributions per member */}
       <section className="mb-6 rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
         <h2 className="mb-4 text-lg font-semibold">{t("contributionsTitle")}</h2>
-        {budget.salaryBudget === 0 ? (
+        {budget.plannedTotal === 0 ? (
           <p className="text-sm text-neutral-400">{t("contributionsEmpty")}</p>
         ) : (
           <ul className="space-y-3">

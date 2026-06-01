@@ -13,10 +13,14 @@ const periodSchema = z.object({
   month: z.coerce.number().int().min(1).max(12),
 });
 
-const setSchema = periodSchema.extend({
+const manualSchema = periodSchema.extend({
   total: z.coerce.number().min(0, "budgetNegative"),
-  // "month": override just this month. "forward": fixed budget from this month on.
-  scope: z.enum(["month", "forward"]).default("month"),
+});
+
+const budgetSchema = z.object({
+  name: z.string().trim().min(1, "budgetNameRequired").max(60),
+  amount: z.coerce.number().min(0, "budgetNegative"),
+  split: z.enum(["equal", "proportional"]).default("proportional"),
 });
 
 /** Re-render the views whose numbers depend on the planned budget. */
@@ -26,20 +30,19 @@ function revalidateBudgetViews() {
   revalidatePath("/");
 }
 
-/**
- * Set the planned budget. With `scope: "month"` it stores a manual override for
- * that single month; with `scope: "forward"` it stores a household-wide fixed
- * budget that applies from that month onward (instead of the salaries).
- */
-export async function setBudget(
+// ---------------------------------------------------------------------------
+// Per-month manual override of the planned total (monthly_budgets).
+// ---------------------------------------------------------------------------
+
+/** Override the planned total for a single month. */
+export async function setManualBudget(
   _prev: BudgetActionState,
   formData: FormData,
 ): Promise<BudgetActionState> {
-  const parsed = setSchema.safeParse({
+  const parsed = manualSchema.safeParse({
     year: formData.get("year"),
     month: formData.get("month"),
     total: formData.get("total"),
-    scope: formData.get("scope") ?? undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
@@ -49,46 +52,24 @@ export async function setBudget(
   if (!household) return { error: "noActiveHousehold" };
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (parsed.data.scope === "forward") {
-    const effectiveFrom = `${parsed.data.year}-${String(parsed.data.month).padStart(2, "0")}-01`;
-    const { error } = await supabase.from("recurring_budgets").upsert(
-      {
-        household_id: household.id,
-        amount: parsed.data.total,
-        effective_from: effectiveFrom,
-        created_by: user?.id ?? null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "household_id" },
-    );
-    if (error) return { error: "generic" };
-  } else {
-    const { error } = await supabase.from("monthly_budgets").upsert(
-      {
-        household_id: household.id,
-        year: parsed.data.year,
-        month: parsed.data.month,
-        total_amount: parsed.data.total,
-        is_manual: true,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "household_id,year,month" },
-    );
-    if (error) return { error: "generic" };
-  }
+  const { error } = await supabase.from("monthly_budgets").upsert(
+    {
+      household_id: household.id,
+      year: parsed.data.year,
+      month: parsed.data.month,
+      total_amount: parsed.data.total,
+      is_manual: true,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "household_id,year,month" },
+  );
+  if (error) return { error: "generic" };
 
   revalidateBudgetViews();
   return { ok: true };
 }
 
-/**
- * Remove the manual override for a single month, reverting to the recurring
- * fixed budget (if any) or the salary-derived total.
- */
+/** Drop a month's manual override, reverting to the budgets / salary total. */
 export async function resetToSalaryBudget(formData: FormData): Promise<void> {
   const parsed = periodSchema.safeParse({
     year: formData.get("year"),
@@ -110,16 +91,88 @@ export async function resetToSalaryBudget(formData: FormData): Promise<void> {
   revalidateBudgetViews();
 }
 
-/** Remove the household's recurring fixed budget (back to salaries). */
-export async function clearRecurringBudget(): Promise<void> {
+// ---------------------------------------------------------------------------
+// Named budgets (budgets) — the household's recurring plan.
+// ---------------------------------------------------------------------------
+
+/** Create a named budget in the active household. */
+export async function createBudget(
+  _prev: BudgetActionState,
+  formData: FormData,
+): Promise<BudgetActionState> {
+  const parsed = budgetSchema.safeParse({
+    name: formData.get("name"),
+    amount: formData.get("amount"),
+    split: formData.get("split") ?? undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
   const household = await getActiveHousehold();
-  if (!household) return;
+  if (!household) return { error: "noActiveHousehold" };
 
   const supabase = await createClient();
-  await supabase
-    .from("recurring_budgets")
-    .delete()
-    .eq("household_id", household.id);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { error } = await supabase.from("budgets").insert({
+    household_id: household.id,
+    name: parsed.data.name,
+    amount: parsed.data.amount,
+    split: parsed.data.split,
+    created_by: user?.id ?? null,
+  });
+  if (error) return { error: "generic" };
+
+  revalidateBudgetViews();
+  return { ok: true };
+}
+
+/** Update a named budget (household-scoped via RLS). */
+export async function updateBudget(
+  _prev: BudgetActionState,
+  formData: FormData,
+): Promise<BudgetActionState> {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { error: "generic" };
+
+  const parsed = budgetSchema.safeParse({
+    name: formData.get("name"),
+    amount: formData.get("amount"),
+    split: formData.get("split") ?? undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const household = await getActiveHousehold();
+  if (!household) return { error: "noActiveHousehold" };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("budgets")
+    .update({
+      name: parsed.data.name,
+      amount: parsed.data.amount,
+      split: parsed.data.split,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) return { error: "generic" };
+
+  revalidateBudgetViews();
+  return { ok: true };
+}
+
+/** Delete a named budget. */
+export async function deleteBudget(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const supabase = await createClient();
+  await supabase.from("budgets").delete().eq("id", id);
 
   revalidateBudgetViews();
 }

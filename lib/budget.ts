@@ -22,15 +22,19 @@ export type SpentByCategory = {
   spent: number;
 };
 
-/** Where the effective planned budget comes from, in priority order. */
-export type BudgetSource = "manual" | "recurring" | "salary";
+/** How a budget's amount is divided among household members. */
+export type BudgetSplit = "equal" | "proportional";
 
-/** A household-wide fixed budget that applies from a given month onward. */
-export type RecurringBudget = {
+/** A named recurring budget (e.g. "Hipoteca", "Súper"). */
+export type Budget = {
+  id: string;
+  name: string;
   amount: number;
-  fromYear: number;
-  fromMonth: number;
+  split: BudgetSplit;
 };
+
+/** Where the effective planned total comes from, in priority order. */
+export type BudgetSource = "manual" | "budgets" | "salary";
 
 export type MonthlyBudget = {
   year: number;
@@ -43,8 +47,8 @@ export type MonthlyBudget = {
   source: BudgetSource;
   /** True when a per-month manual override is stored for this month. */
   isManual: boolean;
-  /** The household's recurring fixed budget, if any (regardless of this month). */
-  recurringBudget: RecurringBudget | null;
+  /** The household's named budgets (regardless of this month's override). */
+  budgets: Budget[];
   /** Total confirmed spending this month. */
   spent: number;
   remaining: number;
@@ -82,35 +86,32 @@ export async function getMonthlyBudget(
     .eq("month", month)
     .maybeSingle();
 
-  // Household-wide recurring fixed budget (if any).
-  const { data: recurring } = await supabase
-    .from("recurring_budgets")
-    .select("amount, effective_from")
+  // The household's named budgets.
+  const { data: budgetRows } = await supabase
+    .from("budgets")
+    .select("id, name, amount, split")
     .eq("household_id", household.id)
-    .maybeSingle();
+    .order("created_at", { ascending: true });
+
+  const budgets: Budget[] = (budgetRows ?? []).map((r) => ({
+    id: r.id as string,
+    name: r.name as string,
+    amount: Number(r.amount) || 0,
+    split: r.split === "equal" ? "equal" : "proportional",
+  }));
+  const budgetsTotal = budgets.reduce((sum, b) => sum + b.amount, 0);
 
   const salaryBudget = household.totalSalaries;
 
-  let recurringBudget: RecurringBudget | null = null;
-  let recurringApplies = false;
-  if (recurring) {
-    const ef = new Date(recurring.effective_from as string); // YYYY-MM-DD (UTC)
-    const fromYear = ef.getUTCFullYear();
-    const fromMonth = ef.getUTCMonth() + 1;
-    recurringBudget = { amount: Number(recurring.amount) || 0, fromYear, fromMonth };
-    recurringApplies =
-      year * 12 + (month - 1) >= fromYear * 12 + (fromMonth - 1);
-  }
-
-  // Resolve the effective budget: per-month manual > recurring fixed > salary.
+  // Resolve the effective total: per-month manual override > named budgets > salary.
   let source: BudgetSource;
   let plannedTotal: number;
   if (stored?.is_manual) {
     source = "manual";
     plannedTotal = Number(stored.total_amount) || 0;
-  } else if (recurringBudget && recurringApplies) {
-    source = "recurring";
-    plannedTotal = recurringBudget.amount;
+  } else if (budgets.length > 0) {
+    source = "budgets";
+    plannedTotal = budgetsTotal;
   } else {
     source = "salary";
     plannedTotal = salaryBudget;
@@ -159,13 +160,44 @@ export async function getMonthlyBudget(
     }
   }
 
-  const contributions: MemberContribution[] = household.members.map((m) => ({
-    userId: m.userId,
-    name: m.fullName || m.email || "Miembro",
-    percent: m.contributionPercent,
-    amount: (m.contributionPercent / 100) * plannedTotal,
-    isCurrentUser: m.userId === household.currentUserId,
-  }));
+  // Per-member contributions. Each budget is split by its own method; "manual"
+  // and "salary" totals are treated as a single proportional budget.
+  const members = household.members;
+  const memberCount = members.length || 1;
+  const totalsByUser = new Map<string, number>(members.map((m) => [m.userId, 0]));
+
+  const addShares = (amount: number, split: BudgetSplit) => {
+    if (amount <= 0) return;
+    // Fall back to an equal split if there are no salaries to weigh by.
+    if (split === "equal" || salaryBudget <= 0) {
+      const per = amount / memberCount;
+      for (const m of members) {
+        totalsByUser.set(m.userId, (totalsByUser.get(m.userId) ?? 0) + per);
+      }
+    } else {
+      for (const m of members) {
+        const share = (m.monthlySalary / salaryBudget) * amount;
+        totalsByUser.set(m.userId, (totalsByUser.get(m.userId) ?? 0) + share);
+      }
+    }
+  };
+
+  if (source === "budgets") {
+    for (const b of budgets) addShares(b.amount, b.split);
+  } else {
+    addShares(plannedTotal, "proportional");
+  }
+
+  const contributions: MemberContribution[] = members.map((m) => {
+    const amount = totalsByUser.get(m.userId) ?? 0;
+    return {
+      userId: m.userId,
+      name: m.fullName || m.email || "—",
+      percent: plannedTotal > 0 ? (amount / plannedTotal) * 100 : 0,
+      amount,
+      isCurrentUser: m.userId === household.currentUserId,
+    };
+  });
 
   const spentByCategory = [...byCat.values()].sort((a, b) => b.spent - a.spent);
 
@@ -176,7 +208,7 @@ export async function getMonthlyBudget(
     plannedTotal,
     source,
     isManual,
-    recurringBudget,
+    budgets,
     spent,
     remaining: plannedTotal - spent,
     usedPercent: plannedTotal > 0 ? (spent / plannedTotal) * 100 : 0,

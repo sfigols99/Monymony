@@ -1,5 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActiveHousehold, type ActiveHousehold } from "@/lib/household";
+import { normalizePeriod, formatPeriod } from "@/lib/period";
+
+// Re-exported so existing server-side imports (`from "@/lib/budget"`) keep
+// working. Client Components must import these from "@/lib/period" instead.
+export { normalizePeriod, formatPeriod };
 
 export type MemberContribution = {
   userId: string;
@@ -17,15 +22,43 @@ export type SpentByCategory = {
   spent: number;
 };
 
+/** How a budget's amount is divided among household members. */
+export type BudgetSplit = "equal" | "proportional";
+
+/** One member's share of a budget. */
+export type BudgetShare = {
+  userId: string;
+  name: string;
+  amount: number; // euros
+  isCurrentUser: boolean;
+};
+
+/** A named recurring budget (e.g. "Hipoteca", "Súper"). */
+export type Budget = {
+  id: string;
+  name: string;
+  amount: number;
+  split: BudgetSplit;
+  /** Per-member breakdown for this budget's amount, by its split method. */
+  shares: BudgetShare[];
+};
+
+/** Where the effective planned total comes from, in priority order. */
+export type BudgetSource = "manual" | "budgets" | "salary";
+
 export type MonthlyBudget = {
   year: number;
   month: number;
   /** Sum of member salaries — the automatic budget base. */
   salaryBudget: number;
-  /** The planned total actually in effect (manual override or salaryBudget). */
+  /** The planned total actually in effect. */
   plannedTotal: number;
-  /** True when a manual override is stored for this month. */
+  /** What the planned total is derived from for this month. */
+  source: BudgetSource;
+  /** True when a per-month manual override is stored for this month. */
   isManual: boolean;
+  /** The household's named budgets (regardless of this month's override). */
+  budgets: Budget[];
   /** Total confirmed spending this month. */
   spent: number;
   remaining: number;
@@ -34,27 +67,6 @@ export type MonthlyBudget = {
   contributions: MemberContribution[];
   spentByCategory: SpentByCategory[];
 };
-
-/** Clamp a possibly-invalid month/year to a sane range, defaulting to now. */
-export function normalizePeriod(year?: number, month?: number) {
-  const now = new Date();
-  const y = Number.isFinite(year) && year! >= 2000 && year! <= 2100 ? year! : now.getFullYear();
-  const m = Number.isFinite(month) && month! >= 1 && month! <= 12 ? month! : now.getMonth() + 1;
-  return { year: y, month: m };
-}
-
-/** "mayo de 2026" / "May 2026" / "maig de 2026" — formatted for the locale. */
-export function formatPeriod(
-  year: number,
-  month: number,
-  locale = "es",
-): string {
-  const d = new Date(year, month - 1, 1);
-  return new Intl.DateTimeFormat(locale, {
-    month: "long",
-    year: "numeric",
-  }).format(d);
-}
 
 function monthRange(year: number, month: number) {
   const start = `${year}-${String(month).padStart(2, "0")}-01`;
@@ -75,7 +87,7 @@ export async function getMonthlyBudget(
 ): Promise<MonthlyBudget> {
   const supabase = await createClient();
 
-  // Stored override (if any) for this period.
+  // Per-month manual override (if any) for this period.
   const { data: stored } = await supabase
     .from("monthly_budgets")
     .select("total_amount, is_manual")
@@ -84,9 +96,60 @@ export async function getMonthlyBudget(
     .eq("month", month)
     .maybeSingle();
 
+  // The household's named budgets.
+  const { data: budgetRows } = await supabase
+    .from("budgets")
+    .select("id, name, amount, split")
+    .eq("household_id", household.id)
+    .order("created_at", { ascending: true });
+
+  const budgetDefs = (budgetRows ?? []).map((r) => ({
+    id: r.id as string,
+    name: r.name as string,
+    amount: Number(r.amount) || 0,
+    split: (r.split === "equal" ? "equal" : "proportional") as BudgetSplit,
+  }));
+  const budgetsTotal = budgetDefs.reduce((sum, b) => sum + b.amount, 0);
+
   const salaryBudget = household.totalSalaries;
-  const isManual = Boolean(stored?.is_manual);
-  const plannedTotal = isManual ? Number(stored!.total_amount) || 0 : salaryBudget;
+  const members = household.members;
+  const memberCount = members.length || 1;
+
+  /** Split an amount across members by the given method. */
+  const shareOf = (amount: number, split: BudgetSplit): BudgetShare[] =>
+    members.map((m) => {
+      // Fall back to an equal split when there are no salaries to weigh by.
+      const amt =
+        split === "equal" || salaryBudget <= 0
+          ? amount / memberCount
+          : (m.monthlySalary / salaryBudget) * amount;
+      return {
+        userId: m.userId,
+        name: m.fullName || m.email || "—",
+        amount: amt,
+        isCurrentUser: m.userId === household.currentUserId,
+      };
+    });
+
+  const budgets: Budget[] = budgetDefs.map((b) => ({
+    ...b,
+    shares: shareOf(b.amount, b.split),
+  }));
+
+  // Resolve the effective total: per-month manual override > named budgets > salary.
+  let source: BudgetSource;
+  let plannedTotal: number;
+  if (stored?.is_manual) {
+    source = "manual";
+    plannedTotal = Number(stored.total_amount) || 0;
+  } else if (budgets.length > 0) {
+    source = "budgets";
+    plannedTotal = budgetsTotal;
+  } else {
+    source = "salary";
+    plannedTotal = salaryBudget;
+  }
+  const isManual = source === "manual";
 
   // Confirmed expenses in the period, joined with their category.
   const { start, end } = monthRange(year, month);
@@ -130,13 +193,28 @@ export async function getMonthlyBudget(
     }
   }
 
-  const contributions: MemberContribution[] = household.members.map((m) => ({
-    userId: m.userId,
-    name: m.fullName || m.email || "Miembro",
-    percent: m.contributionPercent,
-    amount: (m.contributionPercent / 100) * plannedTotal,
-    isCurrentUser: m.userId === household.currentUserId,
-  }));
+  // Per-member contributions: sum each member's share across all budgets.
+  // "manual"/"salary" totals are treated as a single proportional budget.
+  const aggregateShares =
+    source === "budgets"
+      ? budgets.flatMap((b) => b.shares)
+      : shareOf(plannedTotal, "proportional");
+
+  const totalsByUser = new Map<string, number>(members.map((m) => [m.userId, 0]));
+  for (const s of aggregateShares) {
+    totalsByUser.set(s.userId, (totalsByUser.get(s.userId) ?? 0) + s.amount);
+  }
+
+  const contributions: MemberContribution[] = members.map((m) => {
+    const amount = totalsByUser.get(m.userId) ?? 0;
+    return {
+      userId: m.userId,
+      name: m.fullName || m.email || "—",
+      percent: plannedTotal > 0 ? (amount / plannedTotal) * 100 : 0,
+      amount,
+      isCurrentUser: m.userId === household.currentUserId,
+    };
+  });
 
   const spentByCategory = [...byCat.values()].sort((a, b) => b.spent - a.spent);
 
@@ -145,7 +223,9 @@ export async function getMonthlyBudget(
     month,
     salaryBudget,
     plannedTotal,
+    source,
     isManual,
+    budgets,
     spent,
     remaining: plannedTotal - spent,
     usedPercent: plannedTotal > 0 ? (spent / plannedTotal) * 100 : 0,

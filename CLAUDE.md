@@ -70,13 +70,22 @@ There is no test runner configured yet.
   `monthly_limit`). Server Actions in `app/alerts/actions.ts` (`createAlert`,
   `updateAlert`, `toggleAlert`, `deleteAlert`). `AlertBanner` shows triggered
   alerts on the dashboard and `/alerts`.
-- **Budget** lives at `/budget`. `lib/budget.ts` (`getMonthlyBudget`,
-  `normalizePeriod`, `formatPeriod`) builds the monthly snapshot: planned total
-  (manual override from `monthly_budgets` or salary-derived), confirmed spend,
-  remaining, per-member contributions and spend-by-category. Server Actions in
-  `app/budget/actions.ts` (`setManualBudget` upserts an override,
-  `resetToSalaryBudget` deletes it). The page takes `?year=&month=` search
-  params; `MonthNav` switches months.
+- **Budget** lives at `/budget`. A household defines **N named budgets**
+  (`budgets` table: `name`, `amount`, `split` ∈ `equal` | `proportional`).
+  `lib/budget.ts` (`getMonthlyBudget`) resolves the planned total by priority —
+  per-month manual override (`monthly_budgets.is_manual`) → sum of named budgets
+  → salary-derived — exposed as `source: "manual" | "budgets" | "salary"` plus
+  the `budgets` list. Per-member **contributions** are computed per budget by its
+  split (`proportional` = by salary share, `equal` = same per member; falls back
+  to equal when there are no salaries); `manual`/`salary` totals split
+  proportionally. Server Actions in `app/budget/actions.ts`: `createBudget` /
+  `updateBudget` / `deleteBudget` (named budgets), `setManualBudget` /
+  `resetToSalaryBudget` (per-month override). UI: `BudgetLineForm` + `BudgetItem`
+  manage the named budgets; `BudgetForm` is the per-month override. The page
+  takes `?year=&month=`; `MonthNav` switches months. **Pure period helpers
+  (`normalizePeriod`, `formatPeriod`) live in `lib/period.ts`** (no server
+  imports) so Client Components can use them; `lib/budget.ts` re-exports them for
+  server callers.
 - **Category actions** are Server Actions in `app/categories/actions.ts`
   (`createCategory`, `updateCategory`, `deleteCategory`). The `/categories`
   page lists + edits them inline. Icon/color catalogs live in `lib/icons.ts`
@@ -99,7 +108,8 @@ Schema and RLS live in `supabase/migrations/`. Core tables:
 - `households` — a house/group, has an `owner_id`.
 - `household_members` — membership + `monthly_salary`; budget % is derived from salaries.
 - `categories` — user-defined concepts (`name`, `color`, `icon`, optional `monthly_limit`).
-- `monthly_budgets` — planned total per household/month; `is_manual` overrides the salary-derived total.
+- `monthly_budgets` — per-month manual override of the planned total (`is_manual`).
+- `budgets` — named recurring budgets (`name`, `amount`, `split` equal/proportional); the planned total is their sum.
 - `expenses` — `amount`, `category_id`, `expense_date`, `source` (`form`/`ticket`), `status` (`pending`/`confirmed`), `receipt_url`.
 - `alerts` — thresholds (`threshold_percent` or `threshold_amount`); `category_id` null = whole-household.
 
@@ -109,8 +119,11 @@ and add equivalent member-scoped policies. Co-member profile visibility uses
 `shares_household(user_id)`. Cross-table or pre-membership operations go through
 SECURITY DEFINER RPCs (see `0002_households_invites.sql`).
 
+`0003_budgets.sql` adds the `budgets` table (named recurring budgets with a
+split method), member-scoped, and drops the earlier `recurring_budgets`.
+
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`).
+(`0001…`, `0002…`, `0003…`).
 
 ## Environment
 

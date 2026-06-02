@@ -100,6 +100,11 @@ There is no test runner configured yet.
 - **`lib/format.ts`** — `formatEuro` / `formatPercent` (es-ES locale).
 - Client UI bits live in `components/` (`SalaryForm`, `InviteCode`,
   `CategoryForm`, `CategoryItem`, `IconPicker`, `ColorPicker`).
+- **Top loading bar:** `components/LoadingProvider.tsx` (mounted in
+  `app/layout.tsx`) exposes a `useLoading()` context and a fixed top progress bar
+  (semi-transparent indigo). Internal `<a>` clicks start it automatically; it
+  completes when the route (`pathname`/`searchParams`) changes. Programmatic
+  navigations (e.g. `ExpenseFilters`' `router.push`) call `start()` first.
 - Prefer **Server Components** for data fetching and **Server Actions** for
   mutations. Reach for Client Components only when you need interactivity.
 - **Money** is stored as `numeric(12,2)` (euros) in Postgres. Format with the

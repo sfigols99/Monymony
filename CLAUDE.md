@@ -64,12 +64,17 @@ There is no test runner configured yet.
   validate with Zod, check the payer is a household member, and revalidate both
   `/expenses` and `/budget`. Form-sourced expenses are stored `confirmed`.
 - **Alerts** live at `/alerts`. `lib/alerts.ts` (`getAlerts`,
-  `getTriggeredAlerts`) evaluates active alerts against the current month:
-  whole-household (`category_id` null) or per-category, by `threshold_amount`
-  (absolute €) or `threshold_percent` (of the planned budget, or the category's
-  `monthly_limit`). Server Actions in `app/alerts/actions.ts` (`createAlert`,
-  `updateAlert`, `toggleAlert`, `deleteAlert`). `AlertBanner` shows triggered
-  alerts on the dashboard and `/alerts`.
+  `getTriggeredAlerts`) evaluates active alerts against the current month by
+  **scope**: whole-household (`category_id`/`budget_id` null), per-category, or
+  **per budget** (`budget_id`). For `threshold_amount` it fires on the scope's
+  spend; for `threshold_percent` the base is the planned budget (household), the
+  category's `monthly_limit`, or the budget's `amount`. A budget's spend = the
+  confirmed spend of the categories assigned to it (`categories.budget_id`).
+  Server Actions in `app/alerts/actions.ts` (`createAlert`, `updateAlert`,
+  `toggleAlert`, `deleteAlert`); the form posts a single `scope` field
+  (`""` | `cat:<id>` | `bud:<id>`). `AlertForm` groups categories and budgets in
+  the scope picker; `AlertBanner` shows triggered alerts on the dashboard and
+  `/alerts`.
 - **Budget** lives at `/budget`. A household defines **N named budgets**
   (`budgets` table: `name`, `amount`, `split` ∈ `equal` | `proportional`).
   `lib/budget.ts` (`getMonthlyBudget`) resolves the planned total by priority —
@@ -88,8 +93,10 @@ There is no test runner configured yet.
   server callers.
 - **Category actions** are Server Actions in `app/categories/actions.ts`
   (`createCategory`, `updateCategory`, `deleteCategory`). The `/categories`
-  page lists + edits them inline. Icon/color catalogs live in `lib/icons.ts`
-  (`EXPENSE_ICONS`, `CATEGORY_COLORS`); `lib/categories.ts` has `getCategories`.
+  page lists + edits them inline; a category can be assigned to a budget
+  (`categories.budget_id`, selectable in `CategoryForm`). Icon/color catalogs
+  live in `lib/icons.ts` (`EXPENSE_ICONS`, `CATEGORY_COLORS`); `lib/categories.ts`
+  has `getCategories` (joins the budget name).
 - **`lib/format.ts`** — `formatEuro` / `formatPercent` (es-ES locale).
 - Client UI bits live in `components/` (`SalaryForm`, `InviteCode`,
   `CategoryForm`, `CategoryItem`, `IconPicker`, `ColorPicker`).
@@ -110,6 +117,8 @@ Schema and RLS live in `supabase/migrations/`. Core tables:
 - `categories` — user-defined concepts (`name`, `color`, `icon`, optional `monthly_limit`).
 - `monthly_budgets` — per-month manual override of the planned total (`is_manual`).
 - `budgets` — named recurring budgets (`name`, `amount`, `split` equal/proportional); the planned total is their sum.
+- `categories.budget_id` — optional link assigning a category to a budget.
+- `alerts.budget_id` — optional link scoping an alert to a budget.
 - `expenses` — `amount`, `category_id`, `expense_date`, `source` (`form`/`ticket`), `status` (`pending`/`confirmed`), `receipt_url`.
 - `alerts` — thresholds (`threshold_percent` or `threshold_amount`); `category_id` null = whole-household.
 
@@ -121,9 +130,12 @@ SECURITY DEFINER RPCs (see `0002_households_invites.sql`).
 
 `0003_budgets.sql` adds the `budgets` table (named recurring budgets with a
 split method), member-scoped, and drops the earlier `recurring_budgets`.
+`0005_budget_alerts.sql` adds `categories.budget_id` and `alerts.budget_id`
+(linking categories and alerts to budgets). (`0004` is the receipts/OCR
+migration on its own branch — hence the gap.)
 
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`, `0003…`).
+(`0001…`, `0002…`, `0003…`, `0005…`).
 
 ## Environment
 

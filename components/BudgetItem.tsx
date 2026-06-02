@@ -36,6 +36,12 @@ export function BudgetItem({ budget }: { budget: Budget }) {
           >
             {budget.split === "equal" ? t("splitEqual") : t("splitProportional")}
           </span>
+          <span className="ml-2 text-xs text-neutral-400">
+            {t("spentOf", {
+              spent: formatEuro(budget.spent),
+              amount: formatEuro(budget.amount),
+            })}
+          </span>
         </div>
 
         <div className="flex shrink-0 items-center gap-1">

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getActiveHousehold } from "@/lib/household";
 import { getCategories } from "@/lib/categories";
+import { getBudgets } from "@/lib/budget";
 import { CategoryForm } from "@/components/CategoryForm";
 import { CategoryItem } from "@/components/CategoryItem";
 
@@ -13,7 +14,10 @@ export default async function CategoriesPage() {
   }
 
   const t = await getTranslations("categories");
-  const categories = await getCategories(household.id);
+  const [categories, budgets] = await Promise.all([
+    getCategories(household.id),
+    getBudgets(household.id),
+  ]);
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
@@ -34,7 +38,7 @@ export default async function CategoriesPage() {
         {/* New category */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
           <h2 className="mb-4 text-lg font-semibold">{t("newTitle")}</h2>
-          <CategoryForm />
+          <CategoryForm budgets={budgets} />
         </section>
 
         {/* Existing categories */}
@@ -50,7 +54,7 @@ export default async function CategoriesPage() {
           ) : (
             <ul className="space-y-2">
               {categories.map((c) => (
-                <CategoryItem key={c.id} category={c} />
+                <CategoryItem key={c.id} category={c} budgets={budgets} />
               ))}
             </ul>
           )}

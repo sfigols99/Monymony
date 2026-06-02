@@ -41,6 +41,8 @@ export type Budget = {
   split: BudgetSplit;
   /** Per-member breakdown for this budget's amount, by its split method. */
   shares: BudgetShare[];
+  /** Confirmed spend this month across the budget's categories. */
+  spent: number;
 };
 
 /** Where the effective planned total comes from, in priority order. */
@@ -134,6 +136,7 @@ export async function getMonthlyBudget(
   const budgets: Budget[] = budgetDefs.map((b) => ({
     ...b,
     shares: shareOf(b.amount, b.split),
+    spent: 0,
   }));
 
   // Resolve the effective total: per-month manual override > named budgets > salary.
@@ -155,29 +158,31 @@ export async function getMonthlyBudget(
   const { start, end } = monthRange(year, month);
   const { data: expenseRows } = await supabase
     .from("expenses")
-    .select("amount, category_id, categories(name, color, icon)")
+    .select("amount, category_id, categories(name, color, icon, budget_id)")
     .eq("household_id", household.id)
     .eq("status", "confirmed")
     .gte("expense_date", start)
     .lt("expense_date", end);
 
+  type ExpCat = { name: string; color: string; icon: string; budget_id: string | null };
   type ExpRow = {
     amount: number | string;
     category_id: string | null;
-    categories:
-      | { name: string; color: string; icon: string }[]
-      | { name: string; color: string; icon: string }
-      | null;
+    categories: ExpCat[] | ExpCat | null;
   };
 
   const rows = (expenseRows ?? []) as ExpRow[];
   let spent = 0;
   const byCat = new Map<string, SpentByCategory>();
+  const spentByBudget = new Map<string, number>();
 
   for (const r of rows) {
     const amount = Number(r.amount) || 0;
     spent += amount;
     const cat = Array.isArray(r.categories) ? r.categories[0] : r.categories;
+    if (cat?.budget_id) {
+      spentByBudget.set(cat.budget_id, (spentByBudget.get(cat.budget_id) ?? 0) + amount);
+    }
     const key = r.category_id ?? "__none__";
     const existing = byCat.get(key);
     if (existing) {
@@ -192,6 +197,8 @@ export async function getMonthlyBudget(
       });
     }
   }
+
+  for (const b of budgets) b.spent = spentByBudget.get(b.id) ?? 0;
 
   // Per-member contributions: sum each member's share across all budgets.
   // "manual"/"salary" totals are treated as a single proportional budget.
@@ -232,6 +239,22 @@ export async function getMonthlyBudget(
     contributions,
     spentByCategory,
   };
+}
+
+/** Lightweight list of a household's budgets (id + name), for form pickers. */
+export async function getBudgets(
+  householdId: string,
+): Promise<{ id: string; name: string }[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("budgets")
+    .select("id, name")
+    .eq("household_id", householdId)
+    .order("created_at", { ascending: true });
+  return ((data ?? []) as { id: string; name: string }[]).map((r) => ({
+    id: r.id,
+    name: r.name,
+  }));
 }
 
 /** Convenience: load the active household + its budget for a period. */

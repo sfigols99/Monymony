@@ -8,26 +8,32 @@ import { getActiveHousehold } from "@/lib/household";
 /** `error` holds a translation key under the `errors` namespace. */
 export type AlertActionState = { error: string } | { ok: true } | null;
 
+const uuid = z.string().uuid();
+
 const alertSchema = z
   .object({
     name: z.string().trim().min(1, "alertNameRequired").max(60),
-    categoryId: z
-      .union([z.literal(""), z.string().uuid()])
-      .transform((v) => (v === "" ? null : v)),
+    // Scope encodes the target: "" = whole household, "cat:<id>", "bud:<id>".
+    scope: z.string().default(""),
     thresholdType: z.enum(["percent", "amount"]),
     thresholdValue: z.coerce.number().positive("thresholdPositive"),
   })
-  .transform((data) => ({
-    name: data.name,
-    categoryId: data.categoryId,
-    thresholdPercent: data.thresholdType === "percent" ? data.thresholdValue : null,
-    thresholdAmount: data.thresholdType === "amount" ? data.thresholdValue : null,
-  }));
+  .transform((data) => {
+    const catMatch = data.scope.startsWith("cat:") ? data.scope.slice(4) : null;
+    const budMatch = data.scope.startsWith("bud:") ? data.scope.slice(4) : null;
+    return {
+      name: data.name,
+      categoryId: catMatch && uuid.safeParse(catMatch).success ? catMatch : null,
+      budgetId: budMatch && uuid.safeParse(budMatch).success ? budMatch : null,
+      thresholdPercent: data.thresholdType === "percent" ? data.thresholdValue : null,
+      thresholdAmount: data.thresholdType === "amount" ? data.thresholdValue : null,
+    };
+  });
 
 function parse(formData: FormData) {
   return alertSchema.safeParse({
     name: formData.get("name"),
-    categoryId: formData.get("categoryId"),
+    scope: formData.get("scope") ?? "",
     thresholdType: formData.get("thresholdType"),
     thresholdValue: formData.get("thresholdValue"),
   });
@@ -54,6 +60,7 @@ export async function createAlert(
     household_id: household.id,
     name: parsed.data.name,
     category_id: parsed.data.categoryId,
+    budget_id: parsed.data.budgetId,
     threshold_percent: parsed.data.thresholdPercent,
     threshold_amount: parsed.data.thresholdAmount,
     is_active: true,
@@ -84,6 +91,7 @@ export async function updateAlert(
     .update({
       name: parsed.data.name,
       category_id: parsed.data.categoryId,
+      budget_id: parsed.data.budgetId,
       threshold_percent: parsed.data.thresholdPercent,
       threshold_amount: parsed.data.thresholdAmount,
     })

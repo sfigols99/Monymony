@@ -102,7 +102,8 @@
     "byCategoryEmpty": "No confirmed expenses yet this month.",
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
-    "you": "(you)"
+    "you": "(you)",
+    "spentOf": "Spent {spent} of {amount}"
   },
   "categories": {
     "title": "Categories",
@@ -117,7 +118,9 @@
     "create": "Create category",
     "yoursTitle": "Your categories",
     "empty": "No categories yet. Create the first one (energy, groceries, loans…).",
-    "limitLabel": "Limit {amount}/mo"
+    "limitLabel": "Limit {amount}/mo",
+    "budget": "Budget",
+    "noBudget": "No budget"
   },
   "expenses": {
     "title": "Expenses",
@@ -155,7 +158,7 @@
     "threshold": "Threshold",
     "thresholdPercent": "% of budget/limit",
     "thresholdAmount": "€ (absolute amount)",
-    "hintPercent": "Fires when reaching that % of the household budget (or the category's limit).",
+    "hintPercent": "Fires when reaching that % of the chosen scope's limit (household budget, a budget, or the category's limit).",
     "hintAmount": "Fires when monthly spending reaches that amount.",
     "create": "Create alert",
     "yoursTitle": "Your alerts",
@@ -167,7 +170,9 @@
     "thresholdLabel": "threshold {value}",
     "bannerOne": "1 alert triggered",
     "bannerMany": "{count} alerts triggered",
-    "bannerLine": "{name} — {scope}: {spent} of {limit} ({percent})"
+    "bannerLine": "{name} — {scope}: {spent} of {limit} ({percent})",
+    "scopeBudgets": "Budgets",
+    "scopeCategories": "Categories"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

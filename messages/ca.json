@@ -103,7 +103,9 @@
     "prevMonth": "Mes anterior",
     "nextMonth": "Mes següent",
     "you": "(tu)",
-    "spentOf": "Gastat {spent} de {amount}"
+    "spentOf": "Gastat {spent} de {amount}",
+    "icon": "Icona",
+    "color": "Color"
   },
   "categories": {
     "title": "Conceptes",
@@ -145,7 +147,9 @@
     "clearFilters": "Neteja els filtres",
     "emptyFiltered": "No hi ha despeses amb aquests filtres.",
     "pending": "pendent",
-    "fallbackName": "Despesa"
+    "fallbackName": "Despesa",
+    "budget": "Pressupost",
+    "noBudget": "Sense pressupost"
   },
   "alerts": {
     "title": "Alertes",

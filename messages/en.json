@@ -103,7 +103,9 @@
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
     "you": "(you)",
-    "spentOf": "Spent {spent} of {amount}"
+    "spentOf": "Spent {spent} of {amount}",
+    "icon": "Icon",
+    "color": "Color"
   },
   "categories": {
     "title": "Categories",
@@ -145,7 +147,9 @@
     "clearFilters": "Clear filters",
     "emptyFiltered": "No expenses match these filters.",
     "pending": "pending",
-    "fallbackName": "Expense"
+    "fallbackName": "Expense",
+    "budget": "Budget",
+    "noBudget": "No budget"
   },
   "alerts": {
     "title": "Alerts",

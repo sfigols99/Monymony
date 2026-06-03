@@ -33,15 +33,17 @@ export type BudgetShare = {
   isCurrentUser: boolean;
 };
 
-/** A named recurring budget (e.g. "Hipoteca", "Súper"). */
+/** A named recurring budget (e.g. "Hipoteca", "Súper"); also an expense concept. */
 export type Budget = {
   id: string;
   name: string;
   amount: number;
   split: BudgetSplit;
+  icon: string;
+  color: string;
   /** Per-member breakdown for this budget's amount, by its split method. */
   shares: BudgetShare[];
-  /** Confirmed spend this month across the budget's categories. */
+  /** Confirmed spend this month assigned to the budget. */
   spent: number;
 };
 
@@ -101,7 +103,7 @@ export async function getMonthlyBudget(
   // The household's named budgets.
   const { data: budgetRows } = await supabase
     .from("budgets")
-    .select("id, name, amount, split")
+    .select("id, name, amount, split, icon, color")
     .eq("household_id", household.id)
     .order("created_at", { ascending: true });
 
@@ -110,6 +112,8 @@ export async function getMonthlyBudget(
     name: r.name as string,
     amount: Number(r.amount) || 0,
     split: (r.split === "equal" ? "equal" : "proportional") as BudgetSplit,
+    icon: (r.icon as string) || "savings",
+    color: (r.color as string) || "#6366f1",
   }));
   const budgetsTotal = budgetDefs.reduce((sum, b) => sum + b.amount, 0);
 
@@ -158,7 +162,7 @@ export async function getMonthlyBudget(
   const { start, end } = monthRange(year, month);
   const { data: expenseRows } = await supabase
     .from("expenses")
-    .select("amount, category_id, categories(name, color, icon, budget_id)")
+    .select("amount, category_id, budget_id, categories(name, color, icon, budget_id)")
     .eq("household_id", household.id)
     .eq("status", "confirmed")
     .gte("expense_date", start)
@@ -168,6 +172,7 @@ export async function getMonthlyBudget(
   type ExpRow = {
     amount: number | string;
     category_id: string | null;
+    budget_id: string | null;
     categories: ExpCat[] | ExpCat | null;
   };
 
@@ -180,8 +185,10 @@ export async function getMonthlyBudget(
     const amount = Number(r.amount) || 0;
     spent += amount;
     const cat = Array.isArray(r.categories) ? r.categories[0] : r.categories;
-    if (cat?.budget_id) {
-      spentByBudget.set(cat.budget_id, (spentByBudget.get(cat.budget_id) ?? 0) + amount);
+    // Direct budget assignment wins; otherwise fall back to the category's budget.
+    const targetBudget = r.budget_id ?? cat?.budget_id ?? null;
+    if (targetBudget) {
+      spentByBudget.set(targetBudget, (spentByBudget.get(targetBudget) ?? 0) + amount);
     }
     const key = r.category_id ?? "__none__";
     const existing = byCat.get(key);

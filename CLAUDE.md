@@ -58,8 +58,10 @@ There is no test runner configured yet.
   household with members and salary-derived contribution percentages. The home
   page (`app/page.tsx`) redirects to `/onboarding` when there's no household.
 - **Expenses** live at `/expenses`. `lib/expenses.ts` (`getExpenses`) lists a
-  month's expenses (joined with category + payer profile via the
-  `expenses_paid_by_fkey` embed) with category/payer filters. Server Actions in
+  month's expenses (joined with category, **budget** and payer profile via the
+  `expenses_paid_by_fkey` embed) with category/payer filters. An expense can be
+  assigned to a **budget** (the primary concept, shown with the budget's
+  icon/color) and optionally also a category. Server Actions in
   `app/expenses/actions.ts` (`createExpense`, `updateExpense`, `deleteExpense`)
   validate with Zod, check the payer is a household member, and revalidate both
   `/expenses` and `/budget`. Form-sourced expenses are stored `confirmed`.
@@ -69,7 +71,8 @@ There is no test runner configured yet.
   **per budget** (`budget_id`). For `threshold_amount` it fires on the scope's
   spend; for `threshold_percent` the base is the planned budget (household), the
   category's `monthly_limit`, or the budget's `amount`. A budget's spend = the
-  confirmed spend of the categories assigned to it (`categories.budget_id`).
+  confirmed expenses assigned to it directly (`expenses.budget_id`), falling
+  back to expenses whose category belongs to the budget (`categories.budget_id`).
   Server Actions in `app/alerts/actions.ts` (`createAlert`, `updateAlert`,
   `toggleAlert`, `deleteAlert`); the form posts a single `scope` field
   (`""` | `cat:<id>` | `bud:<id>`). `AlertForm` groups categories and budgets in
@@ -121,9 +124,10 @@ Schema and RLS live in `supabase/migrations/`. Core tables:
 - `household_members` — membership + `monthly_salary`; budget % is derived from salaries.
 - `categories` — user-defined concepts (`name`, `color`, `icon`, optional `monthly_limit`).
 - `monthly_budgets` — per-month manual override of the planned total (`is_manual`).
-- `budgets` — named recurring budgets (`name`, `amount`, `split` equal/proportional); the planned total is their sum.
+- `budgets` — named recurring budgets (`name`, `amount`, `split` equal/proportional, `icon`, `color`); the planned total is their sum. Also act as an expense concept.
 - `categories.budget_id` — optional link assigning a category to a budget.
 - `alerts.budget_id` — optional link scoping an alert to a budget.
+- `expenses.budget_id` — optional direct assignment of an expense to a budget (concept).
 - `expenses` — `amount`, `category_id`, `expense_date`, `source` (`form`/`ticket`), `status` (`pending`/`confirmed`), `receipt_url`.
 - `alerts` — thresholds (`threshold_percent` or `threshold_amount`); `category_id` null = whole-household.
 
@@ -136,11 +140,12 @@ SECURITY DEFINER RPCs (see `0002_households_invites.sql`).
 `0003_budgets.sql` adds the `budgets` table (named recurring budgets with a
 split method), member-scoped, and drops the earlier `recurring_budgets`.
 `0005_budget_alerts.sql` adds `categories.budget_id` and `alerts.budget_id`
-(linking categories and alerts to budgets). (`0004` is the receipts/OCR
-migration on its own branch — hence the gap.)
+(linking categories and alerts to budgets). `0006_budget_concept.sql` gives
+budgets an `icon`/`color` and adds `expenses.budget_id` (a budget is also an
+expense concept). (`0004` is the receipts/OCR migration on its own branch.)
 
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`, `0003…`, `0005…`).
+(`0001…`, `0002…`, `0003…`, `0005…`, `0006…`).
 
 ## Environment
 

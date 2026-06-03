@@ -103,7 +103,9 @@
     "prevMonth": "Mes anterior",
     "nextMonth": "Mes siguiente",
     "you": "(tú)",
-    "spentOf": "Gastado {spent} de {amount}"
+    "spentOf": "Gastado {spent} de {amount}",
+    "icon": "Icono",
+    "color": "Color"
   },
   "categories": {
     "title": "Conceptos",
@@ -145,7 +147,9 @@
     "clearFilters": "Limpiar filtros",
     "emptyFiltered": "No hay gastos con estos filtros.",
     "pending": "pendiente",
-    "fallbackName": "Gasto"
+    "fallbackName": "Gasto",
+    "budget": "Presupuesto",
+    "noBudget": "Sin presupuesto"
   },
   "alerts": {
     "title": "Alertas",

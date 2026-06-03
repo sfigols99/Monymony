@@ -139,13 +139,14 @@ SECURITY DEFINER RPCs (see `0002_households_invites.sql`).
 
 `0003_budgets.sql` adds the `budgets` table (named recurring budgets with a
 split method), member-scoped, and drops the earlier `recurring_budgets`.
-`0005_budget_alerts.sql` adds `categories.budget_id` and `alerts.budget_id`
-(linking categories and alerts to budgets). `0006_budget_concept.sql` gives
+`0004_budget_alerts.sql` adds `categories.budget_id` and `alerts.budget_id`
+(linking categories and alerts to budgets). `0005_budget_concept.sql` gives
 budgets an `icon`/`color` and adds `expenses.budget_id` (a budget is also an
-expense concept). (`0004` is the receipts/OCR migration on its own branch.)
+expense concept). The receipts/OCR migration (`0006`) is applied last, on its
+own branch.
 
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`, `0003…`, `0005…`, `0006…`).
+(`0001…`, `0002…`, `0003…`, `0004…`, `0005…`).
 
 ## Environment
 

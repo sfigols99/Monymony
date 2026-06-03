@@ -14,6 +14,7 @@ export type ExpenseInitial = {
   id: string;
   amount: number;
   categoryId: string | null;
+  budgetId: string | null;
   expenseDate: string;
   paidBy: string | null;
   description: string | null;
@@ -38,6 +39,7 @@ function todayIso() {
  */
 export function ExpenseForm({
   categories,
+  budgets = [],
   members,
   initial,
   prefill,
@@ -46,6 +48,7 @@ export function ExpenseForm({
   onDone,
 }: {
   categories: ExpenseOption[];
+  budgets?: ExpenseOption[];
   members: ExpenseOption[];
   initial?: ExpenseInitial;
   prefill?: ExpensePrefill;
@@ -111,10 +114,30 @@ export function ExpenseForm({
         </div>
       </div>
 
+      <div>
+        <label htmlFor="exp-budget" className="mb-1 block text-sm font-medium">
+          {t("budget")}
+        </label>
+        <select
+          id="exp-budget"
+          name="budgetId"
+          defaultValue={initial?.budgetId ?? ""}
+          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
+        >
+          <option value="">{t("noBudget")}</option>
+          {budgets.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="flex flex-wrap gap-4">
         <div className="flex-1">
           <label htmlFor="exp-cat" className="mb-1 block text-sm font-medium">
-            {t("category")}
+            {t("category")}{" "}
+            <span className="font-normal text-neutral-400">— {tc("optional")}</span>
           </label>
           <select
             id="exp-cat"

@@ -17,7 +17,10 @@ export type CategoryInitial = {
   color: string;
   icon: string;
   monthlyLimit: number | null;
+  budgetId: string | null;
 };
+
+export type BudgetOption = { id: string; name: string };
 
 /**
  * Form to create or edit a category. When `initial` is provided it edits that
@@ -25,9 +28,11 @@ export type CategoryInitial = {
  */
 export function CategoryForm({
   initial,
+  budgets = [],
   onDone,
 }: {
   initial?: CategoryInitial;
+  budgets?: BudgetOption[];
   onDone?: () => void;
 }) {
   const t = useTranslations("categories");
@@ -110,6 +115,26 @@ export function CategoryForm({
           placeholder={t("noLimit")}
           className="w-40 rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
         />
+      </div>
+
+      <div>
+        <label htmlFor="cat-budget" className="mb-1 block text-sm font-medium">
+          {t("budget")}{" "}
+          <span className="font-normal text-neutral-400">— {tc("optional")}</span>
+        </label>
+        <select
+          id="cat-budget"
+          name="budgetId"
+          defaultValue={initial?.budgetId ?? ""}
+          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
+        >
+          <option value="">{t("noBudget")}</option>
+          {budgets.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {state && "error" in state && (

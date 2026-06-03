@@ -5,10 +5,16 @@ import { useTranslations } from "next-intl";
 import { type Category } from "@/lib/categories";
 import { deleteCategory } from "@/app/categories/actions";
 import { formatEuro } from "@/lib/format";
-import { CategoryForm } from "./CategoryForm";
+import { CategoryForm, type BudgetOption } from "./CategoryForm";
 
 /** A single category row with inline edit + delete. */
-export function CategoryItem({ category }: { category: Category }) {
+export function CategoryItem({
+  category,
+  budgets = [],
+}: {
+  category: Category;
+  budgets?: BudgetOption[];
+}) {
   const t = useTranslations("categories");
   const tc = useTranslations("common");
   const [editing, setEditing] = useState(false);
@@ -18,12 +24,14 @@ export function CategoryItem({ category }: { category: Category }) {
     return (
       <li className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
         <CategoryForm
+          budgets={budgets}
           initial={{
             id: category.id,
             name: category.name,
             color: category.color,
             icon: category.icon,
             monthlyLimit: category.monthlyLimit,
+            budgetId: category.budgetId,
           }}
           onDone={() => setEditing(false)}
         />
@@ -43,7 +51,14 @@ export function CategoryItem({ category }: { category: Category }) {
           </span>
         </span>
         <div>
-          <p className="font-medium">{category.name}</p>
+          <p className="font-medium">
+            {category.name}
+            {category.budgetName && (
+              <span className="ml-2 rounded bg-indigo-100 px-1.5 py-0.5 text-xs font-normal text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                {category.budgetName}
+              </span>
+            )}
+          </p>
           <p className="text-xs text-neutral-400">
             {category.monthlyLimit != null
               ? t("limitLabel", { amount: formatEuro(category.monthlyLimit) })

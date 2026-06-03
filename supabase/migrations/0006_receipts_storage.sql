@@ -1,10 +1,10 @@
 -- ============================================================================
--- 0004 — Receipt photo storage for OCR-sourced expenses.
+-- 0006 — Receipt photo storage for OCR-sourced expenses (applied last).
 --
 -- Private bucket `receipts`. Objects are laid out as `{household_id}/{file}`,
 -- so access is scoped to household membership by inspecting the first path
 -- segment with the existing is_household_member() helper. Apply in the Supabase
--- SQL editor after 0001–0003.
+-- SQL editor after 0001–0005.
 -- ============================================================================
 
 -- Private bucket (no public URLs; read via signed URLs or the authenticated API).

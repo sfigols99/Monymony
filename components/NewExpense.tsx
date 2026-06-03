@@ -18,10 +18,12 @@ import { type ParsedReceipt } from "@/lib/ocr";
  */
 export function NewExpense({
   categories,
+  budgets = [],
   members,
   householdId,
 }: {
   categories: ExpenseOption[];
+  budgets?: ExpenseOption[];
   members: ExpenseOption[];
   householdId: string;
 }) {
@@ -54,6 +56,7 @@ export function NewExpense({
       <ExpenseForm
         key={formKey}
         categories={categories}
+        budgets={budgets}
         members={members}
         prefill={prefill}
         receiptPath={receiptPath}

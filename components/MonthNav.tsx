@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { formatPeriod } from "@/lib/budget";
+import { formatPeriod } from "@/lib/period";
 
 /** Previous / next month navigation for the budget page. */
 export function MonthNav({ year, month }: { year: number; month: number }) {

@@ -10,8 +10,8 @@ import {
 import { formatEuro } from "@/lib/format";
 
 /**
- * Lets the user override the salary-derived budget for a month, or revert to
- * it. Shows the salary base as a hint / quick-fill.
+ * Override the planned total for a single month (an exception on top of the
+ * household's named budgets / salary base). Reverts back when cleared.
  */
 export function BudgetForm({
   year,
@@ -63,13 +63,15 @@ export function BudgetForm({
         >
           {pending ? tc("saving") : t("setBudget")}
         </button>
-        <button
-          type="button"
-          onClick={() => setValue(String(salaryBudget))}
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-sm font-medium transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-        >
-          {t("useSalaries", { amount: formatEuro(salaryBudget) })}
-        </button>
+        {salaryBudget > 0 && (
+          <button
+            type="button"
+            onClick={() => setValue(String(salaryBudget))}
+            className="rounded-lg border border-neutral-300 px-3 py-2 text-sm font-medium transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+          >
+            {t("useSalaries", { amount: formatEuro(salaryBudget) })}
+          </button>
+        )}
       </form>
 
       {state && "error" in state && (

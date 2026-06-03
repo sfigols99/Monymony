@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { type ExpenseOption } from "./ExpenseForm";
+import { useLoading } from "./LoadingProvider";
 
 /**
  * Month + category + payer filters. Navigates by updating the query string so
@@ -25,6 +26,12 @@ export function ExpenseFilters({
 }) {
   const t = useTranslations("expenses");
   const router = useRouter();
+  const { start } = useLoading();
+
+  function navigate(url: string) {
+    start();
+    router.push(url);
+  }
 
   function go(next: Partial<{ year: number; month: number; categoryId: string; paidBy: string }>) {
     const params = new URLSearchParams();
@@ -34,7 +41,7 @@ export function ExpenseFilters({
     const payer = next.paidBy ?? paidBy;
     if (cat) params.set("categoryId", cat);
     if (payer) params.set("paidBy", payer);
-    router.push(`/expenses?${params.toString()}`);
+    navigate(`/expenses?${params.toString()}`);
   }
 
   // Build a month <input type="month"> value.
@@ -96,7 +103,7 @@ export function ExpenseFilters({
       {(categoryId || paidBy) && (
         <button
           type="button"
-          onClick={() => router.push(`/expenses?year=${year}&month=${month}`)}
+          onClick={() => navigate(`/expenses?year=${year}&month=${month}`)}
           className="rounded-lg px-3 py-2 text-sm text-neutral-500 hover:underline"
         >
           {t("clearFilters")}

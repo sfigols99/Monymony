@@ -23,7 +23,7 @@ export async function AlertBanner({ alerts }: { alerts: TriggeredAlert[] }) {
           <li key={a.id} className="text-sm text-red-700 dark:text-red-300">
             {t("bannerLine", {
               name: a.name,
-              scope: a.categoryName ?? t("wholeHousehold"),
+              scope: a.budgetName ?? a.categoryName ?? t("wholeHousehold"),
               spent: formatEuro(a.spent),
               limit: formatEuro(a.limit),
               percent: formatPercent(a.usedPercent),

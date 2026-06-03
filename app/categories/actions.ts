@@ -18,19 +18,27 @@ const categorySchema = z.object({
   monthlyLimit: z
     .union([z.literal(""), z.coerce.number().min(0)])
     .transform((v) => (v === "" ? null : v)),
+  budgetId: z
+    .union([z.literal(""), z.string().uuid()])
+    .transform((v) => (v === "" ? null : v)),
 });
+
+function parseCategory(formData: FormData) {
+  return categorySchema.safeParse({
+    name: formData.get("name"),
+    color: formData.get("color"),
+    icon: formData.get("icon"),
+    monthlyLimit: formData.get("monthlyLimit"),
+    budgetId: formData.get("budgetId") ?? "",
+  });
+}
 
 /** Create a category in the user's active household. */
 export async function createCategory(
   _prev: CategoryActionState,
   formData: FormData,
 ): Promise<CategoryActionState> {
-  const parsed = categorySchema.safeParse({
-    name: formData.get("name"),
-    color: formData.get("color"),
-    icon: formData.get("icon"),
-    monthlyLimit: formData.get("monthlyLimit"),
-  });
+  const parsed = parseCategory(formData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
@@ -49,6 +57,7 @@ export async function createCategory(
     color: parsed.data.color,
     icon: parsed.data.icon,
     monthly_limit: parsed.data.monthlyLimit,
+    budget_id: parsed.data.budgetId,
     created_by: user?.id ?? null,
   });
 
@@ -71,12 +80,7 @@ export async function updateCategory(
   const id = String(formData.get("id") ?? "");
   if (!id) return { error: "invalidCategory" };
 
-  const parsed = categorySchema.safeParse({
-    name: formData.get("name"),
-    color: formData.get("color"),
-    icon: formData.get("icon"),
-    monthlyLimit: formData.get("monthlyLimit"),
-  });
+  const parsed = parseCategory(formData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
@@ -89,6 +93,7 @@ export async function updateCategory(
       color: parsed.data.color,
       icon: parsed.data.icon,
       monthly_limit: parsed.data.monthlyLimit,
+      budget_id: parsed.data.budgetId,
     })
     .eq("id", id);
 

@@ -4,7 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getActiveHousehold } from "@/lib/household";
 import { getCategories } from "@/lib/categories";
 import { getExpenses } from "@/lib/expenses";
-import { normalizePeriod, formatPeriod } from "@/lib/budget";
+import { normalizePeriod, formatPeriod, getBudgets } from "@/lib/budget";
 import { formatEuro } from "@/lib/format";
 import { type ExpenseOption } from "@/components/ExpenseForm";
 import { NewExpense } from "@/components/NewExpense";
@@ -35,8 +35,9 @@ export default async function ExpensesPage({
     sp.month ? Number(sp.month) : undefined,
   );
 
-  const [categories, expenses] = await Promise.all([
+  const [categories, budgets, expenses] = await Promise.all([
     getCategories(household.id),
+    getBudgets(household.id),
     getExpenses(household.id, {
       year,
       month,
@@ -48,6 +49,10 @@ export default async function ExpensesPage({
   const categoryOptions: ExpenseOption[] = categories.map((c) => ({
     id: c.id,
     label: c.name,
+  }));
+  const budgetOptions: ExpenseOption[] = budgets.map((b) => ({
+    id: b.id,
+    label: b.name,
   }));
   const memberOptions: ExpenseOption[] = household.members.map((m) => ({
     id: m.userId,
@@ -90,6 +95,7 @@ export default async function ExpensesPage({
           )}
           <NewExpense
             categories={categoryOptions}
+            budgets={budgetOptions}
             members={memberOptions}
             householdId={household.id}
           />
@@ -127,6 +133,7 @@ export default async function ExpensesPage({
                   key={e.id}
                   expense={e}
                   categories={categoryOptions}
+                  budgets={budgetOptions}
                   members={memberOptions}
                 />
               ))}

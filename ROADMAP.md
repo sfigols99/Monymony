@@ -35,6 +35,9 @@ Objetivo de **coste 0** usando los planes gratuitos.
 
 - [x] Presupuesto derivado de la suma de salarios
 - [x] Override **manual** del presupuesto por mes (con reset a salarios)
+- [x] **N presupuestos con nombre** (hipoteca, súper…), cada uno con su importe
+- [x] **Reparto por presupuesto**: proporcional a los ingresos o a partes iguales
+- [x] Prioridad del total: override-mes > suma de presupuestos > salarios
 - [x] Vista de planificación mensual (presupuesto vs. gastado) con navegación por meses
 - [x] Reparto de aportaciones por miembro según porcentaje
 - [x] Gasto agrupado por concepto en el mes
@@ -58,7 +61,10 @@ Objetivo de **coste 0** usando los planes gratuitos.
 ## Fase 5 — Alertas ✅
 
 - [x] Definir reglas de alerta (por % del presupuesto/límite o importe absoluto)
-- [x] Alertas globales (todo el hogar) y por concepto
+- [x] Alertas globales (todo el hogar), por concepto y **por presupuesto**
+- [x] Conceptos asignables a un presupuesto (gasto del presupuesto = sus conceptos)
+- [x] Presupuestos con **icono + color**, usables como concepto de gasto
+  (las despeses se asignan directamente a un presupuesto)
 - [x] Activar/desactivar, editar y borrar alertas
 - [x] Indicadores visuales: banner de alertas disparadas en dashboard y `/alerts`
 

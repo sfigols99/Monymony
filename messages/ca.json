@@ -58,7 +58,9 @@
     "navAlerts": "Alertes",
     "navAlertsDesc": "Avisos quan es gasta de més",
     "nextHint": "🚧 Següent: lectura de tiquets per OCR i predicció de despeses (vegeu ROADMAP.md).",
-    "leaveHousehold": "Surt de la llar"
+    "leaveHousehold": "Surt de la llar",
+    "showSalaries": "Mostra els salaris",
+    "hideSalaries": "Amaga els salaris"
   },
   "salary": {
     "label": "El teu salari mensual (€)"
@@ -72,23 +74,40 @@
     "subtitle": "Planificació mensual de la llar.",
     "monthBudget": "Pressupost del mes",
     "manual": "manual",
+    "fromBudgets": "segons els teus pressupostos",
     "fromSalaries": "derivat dels salaris",
     "spent": "Gastat",
     "over": "{amount} de més",
     "available": "{amount} disponible",
     "used": "{percent} utilitzat",
-    "adjustTitle": "Ajusta el pressupost",
-    "adjustHint": "Per defecte és la suma de salaris ({amount}). Pots fixar un import manual per a aquest mes.",
-    "manualLabel": "Pressupost manual (€)",
-    "setBudget": "Fixa el pressupost",
+    "budgetsTitle": "Pressupostos",
+    "budgetsSubtitle": "Crea un o més pressupostos (hipoteca, súper…), cadascun amb el seu import i repartiment.",
+    "budgetsEmpty": "Encara no hi ha pressupostos. Mentrestant s'usa la suma de salaris.",
+    "newBudget": "Nou pressupost",
+    "addBudget": "Afegeix pressupost",
+    "budgetName": "Nom del pressupost",
+    "budgetNamePlaceholder": "Hipoteca",
+    "budgetAmount": "Import (€)",
+    "splitLabel": "Repartiment",
+    "splitProportional": "Proporcional als ingressos",
+    "splitEqual": "A parts iguals",
+    "splitHint": "Proporcional: cada membre paga segons el seu salari. A parts iguals: el mateix cadascú.",
+    "adjustTitle": "Ajust d'aquest mes",
+    "adjustHintMonth": "Fixa un total només per a aquest mes (excepció puntual sobre els teus pressupostos).",
+    "manualLabel": "Pressupost del mes (€)",
+    "setBudget": "Fixa aquest mes",
     "useSalaries": "Usa els salaris ({amount})",
-    "revert": "↺ Torna al pressupost per salaris",
+    "revert": "↺ Treu l'ajust d'aquest mes",
     "contributionsTitle": "Aportació per membre",
-    "contributionsEmpty": "Afegeix els salaris dels membres per repartir el pressupost.",
+    "contributionsEmpty": "Defineix pressupostos o salaris per repartir l'aportació.",
     "byCategoryTitle": "Despesa per concepte",
     "byCategoryEmpty": "Encara no hi ha despeses confirmades aquest mes.",
     "prevMonth": "Mes anterior",
-    "nextMonth": "Mes següent"
+    "nextMonth": "Mes següent",
+    "you": "(tu)",
+    "spentOf": "Gastat {spent} de {amount}",
+    "icon": "Icona",
+    "color": "Color"
   },
   "categories": {
     "title": "Conceptes",
@@ -103,7 +122,9 @@
     "create": "Crea el concepte",
     "yoursTitle": "Els teus conceptes",
     "empty": "Encara no hi ha conceptes. Crea el primer (energia, supermercat, préstecs…).",
-    "limitLabel": "Límit {amount}/mes"
+    "limitLabel": "Límit {amount}/mes",
+    "budget": "Pressupost",
+    "noBudget": "Sense pressupost"
   },
   "expenses": {
     "title": "Despeses",
@@ -129,6 +150,8 @@
     "emptyFiltered": "No hi ha despeses amb aquests filtres.",
     "pending": "pendent",
     "fallbackName": "Despesa",
+    "budget": "Pressupost",
+    "noBudget": "Sense pressupost",
     "scan": {
       "hint": "Fes una foto del tiquet i omplim la despesa per tu. Revisa-la abans de desar.",
       "choose": "Fes una foto o puja una imatge",
@@ -150,7 +173,7 @@
     "threshold": "Llindar",
     "thresholdPercent": "% del pressupost/límit",
     "thresholdAmount": "€ (import absolut)",
-    "hintPercent": "Salta en assolir aquest % del pressupost de la llar (o del límit del concepte).",
+    "hintPercent": "Salta en assolir aquest % del límit de l'àmbit triat (pressupost de la llar, un pressupost o el límit del concepte).",
     "hintAmount": "Salta quan la despesa del mes assoleix aquest import.",
     "create": "Crea l'alerta",
     "yoursTitle": "Les teves alertes",
@@ -162,7 +185,9 @@
     "thresholdLabel": "llindar {value}",
     "bannerOne": "1 alerta activada",
     "bannerMany": "{count} alertes activades",
-    "bannerLine": "{name} — {scope}: {spent} de {limit} ({percent})"
+    "bannerLine": "{name} — {scope}: {spent} de {limit} ({percent})",
+    "scopeBudgets": "Pressupostos",
+    "scopeCategories": "Conceptes"
   },
   "errors": {
     "generic": "Alguna cosa ha anat malament. Torna-ho a provar.",
@@ -189,6 +214,7 @@
     "emailInUse": "Aquest correu ja està registrat.",
     "emailNotConfirmed": "Confirma el teu correu abans d'iniciar la sessió.",
     "passwordTooShort": "La contrasenya ha de tenir almenys 6 caràcters.",
+    "budgetNameRequired": "Posa un nom al pressupost",
     "uploadFailed": "No s'ha pogut pujar la imatge. Torna-ho a provar.",
     "ocrFailed": "No s'ha pogut llegir el tiquet. Prova amb una altra foto o introdueix-la a mà."
   }

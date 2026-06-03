@@ -58,7 +58,9 @@
     "navAlerts": "Alertas",
     "navAlertsDesc": "Avisos cuando se gasta de más",
     "nextHint": "🚧 Siguiente: lectura de tickets por OCR y predicción de gastos (ver ROADMAP.md).",
-    "leaveHousehold": "Salir del hogar"
+    "leaveHousehold": "Salir del hogar",
+    "showSalaries": "Mostrar salarios",
+    "hideSalaries": "Ocultar salarios"
   },
   "salary": {
     "label": "Tu salario mensual (€)"
@@ -72,23 +74,40 @@
     "subtitle": "Planificación mensual del hogar.",
     "monthBudget": "Presupuesto del mes",
     "manual": "manual",
+    "fromBudgets": "según tus presupuestos",
     "fromSalaries": "derivado de los salarios",
     "spent": "Gastado",
     "over": "{amount} de más",
     "available": "{amount} disponible",
     "used": "{percent} usado",
-    "adjustTitle": "Ajustar presupuesto",
-    "adjustHint": "Por defecto es la suma de salarios ({amount}). Puedes fijar un importe manual para este mes.",
-    "manualLabel": "Presupuesto manual (€)",
-    "setBudget": "Fijar presupuesto",
+    "budgetsTitle": "Presupuestos",
+    "budgetsSubtitle": "Crea uno o varios presupuestos (hipoteca, súper…), cada uno con su importe y reparto.",
+    "budgetsEmpty": "Aún no hay presupuestos. Mientras tanto se usa la suma de salarios.",
+    "newBudget": "Nuevo presupuesto",
+    "addBudget": "Añadir presupuesto",
+    "budgetName": "Nombre del presupuesto",
+    "budgetNamePlaceholder": "Hipoteca",
+    "budgetAmount": "Importe (€)",
+    "splitLabel": "Reparto",
+    "splitProportional": "Proporcional a los ingresos",
+    "splitEqual": "A partes iguales",
+    "splitHint": "Proporcional: cada miembro paga según su salario. A partes iguales: lo mismo cada uno.",
+    "adjustTitle": "Ajuste de este mes",
+    "adjustHintMonth": "Fija un total solo para este mes (excepción puntual sobre tus presupuestos).",
+    "manualLabel": "Presupuesto del mes (€)",
+    "setBudget": "Fijar este mes",
     "useSalaries": "Usar salarios ({amount})",
-    "revert": "↺ Volver al presupuesto por salarios",
+    "revert": "↺ Quitar el ajuste de este mes",
     "contributionsTitle": "Aportación por miembro",
-    "contributionsEmpty": "Añade los salarios de los miembros para repartir el presupuesto.",
+    "contributionsEmpty": "Define presupuestos o salarios para repartir la aportación.",
     "byCategoryTitle": "Gasto por concepto",
     "byCategoryEmpty": "Aún no hay gastos confirmados este mes.",
     "prevMonth": "Mes anterior",
-    "nextMonth": "Mes siguiente"
+    "nextMonth": "Mes siguiente",
+    "you": "(tú)",
+    "spentOf": "Gastado {spent} de {amount}",
+    "icon": "Icono",
+    "color": "Color"
   },
   "categories": {
     "title": "Conceptos",
@@ -103,7 +122,9 @@
     "create": "Crear concepto",
     "yoursTitle": "Tus conceptos",
     "empty": "Aún no hay conceptos. Crea el primero (energía, supermercado, préstamos…).",
-    "limitLabel": "Límite {amount}/mes"
+    "limitLabel": "Límite {amount}/mes",
+    "budget": "Presupuesto",
+    "noBudget": "Sin presupuesto"
   },
   "expenses": {
     "title": "Gastos",
@@ -129,6 +150,8 @@
     "emptyFiltered": "No hay gastos con estos filtros.",
     "pending": "pendiente",
     "fallbackName": "Gasto",
+    "budget": "Presupuesto",
+    "noBudget": "Sin presupuesto",
     "scan": {
       "hint": "Haz una foto del ticket y rellenamos el gasto por ti. Revísalo antes de guardar.",
       "choose": "Hacer foto o subir imagen",
@@ -150,7 +173,7 @@
     "threshold": "Umbral",
     "thresholdPercent": "% del presupuesto/límite",
     "thresholdAmount": "€ (importe absoluto)",
-    "hintPercent": "Salta al alcanzar ese % del presupuesto del hogar (o del límite del concepto).",
+    "hintPercent": "Salta al alcanzar ese % del límite del ámbito elegido (presupuesto del hogar, un presupuesto o el límite del concepto).",
     "hintAmount": "Salta cuando el gasto del mes alcanza ese importe.",
     "create": "Crear alerta",
     "yoursTitle": "Tus alertas",
@@ -162,7 +185,9 @@
     "thresholdLabel": "umbral {value}",
     "bannerOne": "1 alerta activada",
     "bannerMany": "{count} alertas activadas",
-    "bannerLine": "{name} — {scope}: {spent} de {limit} ({percent})"
+    "bannerLine": "{name} — {scope}: {spent} de {limit} ({percent})",
+    "scopeBudgets": "Presupuestos",
+    "scopeCategories": "Conceptos"
   },
   "errors": {
     "generic": "Algo ha ido mal. Inténtalo de nuevo.",
@@ -189,6 +214,7 @@
     "emailInUse": "Ese email ya está registrado.",
     "emailNotConfirmed": "Confirma tu email antes de iniciar sesión.",
     "passwordTooShort": "La contraseña debe tener al menos 6 caracteres.",
+    "budgetNameRequired": "Pon un nombre al presupuesto",
     "uploadFailed": "No se pudo subir la imagen. Inténtalo de nuevo.",
     "ocrFailed": "No se pudo leer el ticket. Prueba con otra foto o introdúcelo a mano."
   }

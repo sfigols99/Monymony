@@ -17,7 +17,40 @@ const manualSchema = periodSchema.extend({
   total: z.coerce.number().min(0, "budgetNegative"),
 });
 
-/** Set a manual budget override for a given month. */
+const budgetSchema = z.object({
+  name: z.string().trim().min(1, "budgetNameRequired").max(60),
+  amount: z.coerce.number().min(0, "budgetNegative"),
+  split: z.enum(["equal", "proportional"]).default("proportional"),
+  icon: z.string().trim().min(1).max(50).default("savings"),
+  color: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/, "colorInvalid")
+    .default("#6366f1"),
+});
+
+function parseBudget(formData: FormData) {
+  return budgetSchema.safeParse({
+    name: formData.get("name"),
+    amount: formData.get("amount"),
+    split: formData.get("split") ?? undefined,
+    icon: formData.get("icon") ?? undefined,
+    color: formData.get("color") ?? undefined,
+  });
+}
+
+/** Re-render the views whose numbers depend on the planned budget. */
+function revalidateBudgetViews() {
+  revalidatePath("/budget");
+  revalidatePath("/alerts");
+  revalidatePath("/");
+}
+
+// ---------------------------------------------------------------------------
+// Per-month manual override of the planned total (monthly_budgets).
+// ---------------------------------------------------------------------------
+
+/** Override the planned total for a single month. */
 export async function setManualBudget(
   _prev: BudgetActionState,
   formData: FormData,
@@ -46,17 +79,13 @@ export async function setManualBudget(
     },
     { onConflict: "household_id,year,month" },
   );
-
   if (error) return { error: "generic" };
 
-  revalidatePath("/budget");
+  revalidateBudgetViews();
   return { ok: true };
 }
 
-/**
- * Remove the manual override for a month, reverting to the salary-derived
- * budget. Deleting the row is enough: the budget falls back to salaries.
- */
+/** Drop a month's manual override, reverting to the budgets / salary total. */
 export async function resetToSalaryBudget(formData: FormData): Promise<void> {
   const parsed = periodSchema.safeParse({
     year: formData.get("year"),
@@ -75,5 +104,87 @@ export async function resetToSalaryBudget(formData: FormData): Promise<void> {
     .eq("year", parsed.data.year)
     .eq("month", parsed.data.month);
 
-  revalidatePath("/budget");
+  revalidateBudgetViews();
+}
+
+// ---------------------------------------------------------------------------
+// Named budgets (budgets) — the household's recurring plan.
+// ---------------------------------------------------------------------------
+
+/** Create a named budget in the active household. */
+export async function createBudget(
+  _prev: BudgetActionState,
+  formData: FormData,
+): Promise<BudgetActionState> {
+  const parsed = parseBudget(formData);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const household = await getActiveHousehold();
+  if (!household) return { error: "noActiveHousehold" };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { error } = await supabase.from("budgets").insert({
+    household_id: household.id,
+    name: parsed.data.name,
+    amount: parsed.data.amount,
+    split: parsed.data.split,
+    icon: parsed.data.icon,
+    color: parsed.data.color,
+    created_by: user?.id ?? null,
+  });
+  if (error) return { error: "generic" };
+
+  revalidateBudgetViews();
+  return { ok: true };
+}
+
+/** Update a named budget (household-scoped via RLS). */
+export async function updateBudget(
+  _prev: BudgetActionState,
+  formData: FormData,
+): Promise<BudgetActionState> {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { error: "generic" };
+
+  const parsed = parseBudget(formData);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const household = await getActiveHousehold();
+  if (!household) return { error: "noActiveHousehold" };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("budgets")
+    .update({
+      name: parsed.data.name,
+      amount: parsed.data.amount,
+      split: parsed.data.split,
+      icon: parsed.data.icon,
+      color: parsed.data.color,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) return { error: "generic" };
+
+  revalidateBudgetViews();
+  return { ok: true };
+}
+
+/** Delete a named budget. */
+export async function deleteBudget(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const supabase = await createClient();
+  await supabase.from("budgets").delete().eq("id", id);
+
+  revalidateBudgetViews();
 }

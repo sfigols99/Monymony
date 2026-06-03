@@ -12,9 +12,11 @@ import { type ExpenseOption } from "./ExpenseForm";
 export function AlertItem({
   alert,
   categories,
+  budgets = [],
 }: {
   alert: Alert;
   categories: ExpenseOption[];
+  budgets?: ExpenseOption[];
 }) {
   const t = useTranslations("alerts");
   const tc = useTranslations("common");
@@ -26,10 +28,12 @@ export function AlertItem({
       <li className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
         <AlertForm
           categories={categories}
+          budgets={budgets}
           initial={{
             id: alert.id,
             name: alert.name,
             categoryId: alert.categoryId,
+            budgetId: alert.budgetId,
             thresholdPercent: alert.thresholdPercent,
             thresholdAmount: alert.thresholdAmount,
           }}
@@ -45,7 +49,18 @@ export function AlertItem({
       : alert.thresholdPercent != null
         ? formatPercent(alert.thresholdPercent)
         : "—";
-  const scope = alert.categoryName ?? t("wholeHousehold");
+  const scope =
+    alert.budgetName ?? alert.categoryName ?? t("wholeHousehold");
+  const iconColor = alert.budgetId
+    ? "#6366f1"
+    : alert.categoryId
+      ? alert.categoryColor
+      : "#9ca3af";
+  const iconName = alert.budgetId
+    ? "savings"
+    : alert.categoryId
+      ? alert.categoryIcon
+      : "notifications";
 
   return (
     <li
@@ -56,10 +71,10 @@ export function AlertItem({
       <div className="flex min-w-0 items-center gap-3">
         <span
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white"
-          style={{ backgroundColor: alert.categoryColor }}
+          style={{ backgroundColor: iconColor }}
         >
           <span className="material-symbols-rounded text-[22px]">
-            {alert.categoryId ? alert.categoryIcon : "notifications"}
+            {iconName}
           </span>
         </span>
         <div className="min-w-0">

@@ -58,7 +58,9 @@
     "navAlerts": "Alerts",
     "navAlertsDesc": "Warnings when you overspend",
     "nextHint": "🚧 Next: receipt OCR and expense prediction (see ROADMAP.md).",
-    "leaveHousehold": "Leave household"
+    "leaveHousehold": "Leave household",
+    "showSalaries": "Show salaries",
+    "hideSalaries": "Hide salaries"
   },
   "salary": {
     "label": "Your monthly salary (€)"
@@ -72,23 +74,40 @@
     "subtitle": "Monthly household planning.",
     "monthBudget": "This month's budget",
     "manual": "manual",
+    "fromBudgets": "from your budgets",
     "fromSalaries": "derived from salaries",
     "spent": "Spent",
     "over": "{amount} over",
     "available": "{amount} available",
     "used": "{percent} used",
-    "adjustTitle": "Adjust budget",
-    "adjustHint": "Defaults to the sum of salaries ({amount}). You can set a manual amount for this month.",
-    "manualLabel": "Manual budget (€)",
-    "setBudget": "Set budget",
+    "budgetsTitle": "Budgets",
+    "budgetsSubtitle": "Create one or more budgets (mortgage, groceries…), each with its amount and split.",
+    "budgetsEmpty": "No budgets yet. Meanwhile the salary sum is used.",
+    "newBudget": "New budget",
+    "addBudget": "Add budget",
+    "budgetName": "Budget name",
+    "budgetNamePlaceholder": "Mortgage",
+    "budgetAmount": "Amount (€)",
+    "splitLabel": "Split",
+    "splitProportional": "Proportional to income",
+    "splitEqual": "Equal shares",
+    "splitHint": "Proportional: each member pays by salary. Equal: the same for everyone.",
+    "adjustTitle": "This month's adjustment",
+    "adjustHintMonth": "Set a total for this month only (a one-off exception over your budgets).",
+    "manualLabel": "This month's budget (€)",
+    "setBudget": "Set this month",
     "useSalaries": "Use salaries ({amount})",
-    "revert": "↺ Back to salary-based budget",
+    "revert": "↺ Remove this month's adjustment",
     "contributionsTitle": "Contribution per member",
-    "contributionsEmpty": "Add members' salaries to split the budget.",
+    "contributionsEmpty": "Define budgets or salaries to split the contribution.",
     "byCategoryTitle": "Spending by category",
     "byCategoryEmpty": "No confirmed expenses yet this month.",
     "prevMonth": "Previous month",
-    "nextMonth": "Next month"
+    "nextMonth": "Next month",
+    "you": "(you)",
+    "spentOf": "Spent {spent} of {amount}",
+    "icon": "Icon",
+    "color": "Color"
   },
   "categories": {
     "title": "Categories",
@@ -103,7 +122,9 @@
     "create": "Create category",
     "yoursTitle": "Your categories",
     "empty": "No categories yet. Create the first one (energy, groceries, loans…).",
-    "limitLabel": "Limit {amount}/mo"
+    "limitLabel": "Limit {amount}/mo",
+    "budget": "Budget",
+    "noBudget": "No budget"
   },
   "expenses": {
     "title": "Expenses",
@@ -129,6 +150,8 @@
     "emptyFiltered": "No expenses match these filters.",
     "pending": "pending",
     "fallbackName": "Expense",
+    "budget": "Budget",
+    "noBudget": "No budget",
     "scan": {
       "hint": "Take a photo of the receipt and we'll fill in the expense. Review it before saving.",
       "choose": "Take photo or upload image",
@@ -150,7 +173,7 @@
     "threshold": "Threshold",
     "thresholdPercent": "% of budget/limit",
     "thresholdAmount": "€ (absolute amount)",
-    "hintPercent": "Fires when reaching that % of the household budget (or the category's limit).",
+    "hintPercent": "Fires when reaching that % of the chosen scope's limit (household budget, a budget, or the category's limit).",
     "hintAmount": "Fires when monthly spending reaches that amount.",
     "create": "Create alert",
     "yoursTitle": "Your alerts",
@@ -162,7 +185,9 @@
     "thresholdLabel": "threshold {value}",
     "bannerOne": "1 alert triggered",
     "bannerMany": "{count} alerts triggered",
-    "bannerLine": "{name} — {scope}: {spent} of {limit} ({percent})"
+    "bannerLine": "{name} — {scope}: {spent} of {limit} ({percent})",
+    "scopeBudgets": "Budgets",
+    "scopeCategories": "Categories"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -189,6 +214,7 @@
     "emailInUse": "That email is already registered.",
     "emailNotConfirmed": "Confirm your email before signing in.",
     "passwordTooShort": "The password must be at least 6 characters.",
+    "budgetNameRequired": "Give the budget a name",
     "uploadFailed": "Couldn't upload the image. Please try again.",
     "ocrFailed": "Couldn't read the receipt. Try another photo or enter it manually."
   }

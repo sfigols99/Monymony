@@ -58,7 +58,9 @@
     "navAlerts": "Alertas",
     "navAlertsDesc": "Avisos cuando se gasta de más",
     "nextHint": "🚧 Siguiente: lectura de tickets por OCR y predicción de gastos (ver ROADMAP.md).",
-    "leaveHousehold": "Salir del hogar"
+    "leaveHousehold": "Salir del hogar",
+    "showSalaries": "Mostrar salarios",
+    "hideSalaries": "Ocultar salarios"
   },
   "salary": {
     "label": "Tu salario mensual (€)"

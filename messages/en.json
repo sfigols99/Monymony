@@ -58,7 +58,9 @@
     "navAlerts": "Alerts",
     "navAlertsDesc": "Warnings when you overspend",
     "nextHint": "🚧 Next: receipt OCR and expense prediction (see ROADMAP.md).",
-    "leaveHousehold": "Leave household"
+    "leaveHousehold": "Leave household",
+    "showSalaries": "Show salaries",
+    "hideSalaries": "Hide salaries"
   },
   "salary": {
     "label": "Your monthly salary (€)"

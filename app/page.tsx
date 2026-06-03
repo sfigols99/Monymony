@@ -11,6 +11,12 @@ import { SalaryForm } from "@/components/SalaryForm";
 import { InviteCode } from "@/components/InviteCode";
 import { AlertBanner } from "@/components/AlertBanner";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import {
+  PrivacyProvider,
+  PrivacyToggle,
+  Sensitive,
+  ContributionBar,
+} from "@/components/Privacy";
 
 export default async function Home() {
   const household = await getActiveHousehold();
@@ -36,6 +42,7 @@ export default async function Home() {
   ];
 
   return (
+    <PrivacyProvider>
     <main className="mx-auto max-w-3xl px-6 py-12">
       <header className="mb-10 flex items-center justify-between">
         <div>
@@ -43,6 +50,7 @@ export default async function Home() {
           <p className="text-sm text-neutral-500">{tc("tagline")}</p>
         </div>
         <div className="flex items-center gap-2">
+          <PrivacyToggle />
           <LocaleSwitcher />
           <form action={signOut}>
             <button
@@ -62,7 +70,7 @@ export default async function Home() {
         <div className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
           <p className="text-sm text-neutral-500">{t("budgetBase")}</p>
           <p className="mt-1 text-2xl font-bold">
-            {formatEuro(household.totalSalaries)}
+            <Sensitive>{formatEuro(household.totalSalaries)}</Sensitive>
           </p>
           <p className="mt-1 text-xs text-neutral-400">{t("perMonth")}</p>
         </div>
@@ -97,18 +105,13 @@ export default async function Home() {
                     )}
                   </span>
                   <span className="text-neutral-500">
-                    {formatEuro(m.monthlySalary)} ·{" "}
+                    <Sensitive>{formatEuro(m.monthlySalary)}</Sensitive> ·{" "}
                     <span className="font-medium text-neutral-700 dark:text-neutral-300">
-                      {formatPercent(m.contributionPercent)}
+                      <Sensitive>{formatPercent(m.contributionPercent)}</Sensitive>
                     </span>
                   </span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
-                  <div
-                    className="h-full rounded-full bg-indigo-500"
-                    style={{ width: `${m.contributionPercent}%` }}
-                  />
-                </div>
+                <ContributionBar percent={m.contributionPercent} />
               </li>
             );
           })}
@@ -154,5 +157,6 @@ export default async function Home() {
         </form>
       </section>
     </main>
+    </PrivacyProvider>
   );
 }

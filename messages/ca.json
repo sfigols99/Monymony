@@ -58,7 +58,9 @@
     "navAlerts": "Alertes",
     "navAlertsDesc": "Avisos quan es gasta de més",
     "nextHint": "🚧 Següent: lectura de tiquets per OCR i predicció de despeses (vegeu ROADMAP.md).",
-    "leaveHousehold": "Surt de la llar"
+    "leaveHousehold": "Surt de la llar",
+    "showSalaries": "Mostra els salaris",
+    "hideSalaries": "Amaga els salaris"
   },
   "salary": {
     "label": "El teu salari mensual (€)"

@@ -151,7 +151,16 @@
     "pending": "pendiente",
     "fallbackName": "Gasto",
     "budget": "Presupuesto",
-    "noBudget": "Sin presupuesto"
+    "noBudget": "Sin presupuesto",
+    "scan": {
+      "hint": "Haz una foto del ticket y rellenamos el gasto por ti. Revísalo antes de guardar.",
+      "choose": "Hacer foto o subir imagen",
+      "uploading": "Subiendo imagen…",
+      "reading": "Leyendo el ticket… {percent}%",
+      "detected": "Datos detectados del ticket. Revísalos antes de guardar.",
+      "retake": "Usar otra imagen",
+      "or": "o introdúcelo a mano"
+    }
   },
   "alerts": {
     "title": "Alertas",
@@ -205,6 +214,8 @@
     "emailInUse": "Ese email ya está registrado.",
     "emailNotConfirmed": "Confirma tu email antes de iniciar sesión.",
     "passwordTooShort": "La contraseña debe tener al menos 6 caracteres.",
-    "budgetNameRequired": "Pon un nombre al presupuesto"
+    "budgetNameRequired": "Pon un nombre al presupuesto",
+    "uploadFailed": "No se pudo subir la imagen. Inténtalo de nuevo.",
+    "ocrFailed": "No se pudo leer el ticket. Prueba con otra foto o introdúcelo a mano."
   }
 }

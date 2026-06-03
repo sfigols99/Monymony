@@ -68,12 +68,16 @@ Objetivo de **coste 0** usando los planes gratuitos.
 - [x] Activar/desactivar, editar y borrar alertas
 - [x] Indicadores visuales: banner de alertas disparadas en dashboard y `/alerts`
 
-## Fase 6 — Gastos por foto de ticket (OCR)
+## Fase 6 — Gastos por foto de ticket (OCR) ✅
 
-- [ ] Subida de foto a Supabase Storage
-- [ ] Pipeline OCR para extraer importe (y opcionalmente comercio/fecha)
-- [ ] Gasto en estado `pending` para **validación del usuario** antes de confirmar
-- [ ] Edición del resultado OCR y confirmación
+- [x] Subida de foto a Supabase Storage (bucket privado `receipts`, RLS por hogar)
+- [x] OCR **en cliente** (Tesseract.js/WASM, coste 0 y compatible con Vercel free)
+- [x] Extracción de importe/fecha/comercio (`lib/ocr/parse.ts`, heurísticas EUR)
+- [x] Capa OCR **pluggable** (`OCRProvider`) lista para un provider remoto futuro
+- [x] Prefill del formulario y revisión del usuario antes de guardar (`source: ticket`)
+- [x] Dockerfile standalone para self-hosting (open source)
+- [ ] (Futuro) Provider remoto opcional: LLM vision / PaddleOCR self-host vía `/api/ocr`
+- [ ] (Futuro) Ver el ticket guardado (signed URL) desde el gasto
 
 ## Fase 7 — Análisis y predicción
 

@@ -151,7 +151,16 @@
     "pending": "pendent",
     "fallbackName": "Despesa",
     "budget": "Pressupost",
-    "noBudget": "Sense pressupost"
+    "noBudget": "Sense pressupost",
+    "scan": {
+      "hint": "Fes una foto del tiquet i omplim la despesa per tu. Revisa-la abans de desar.",
+      "choose": "Fes una foto o puja una imatge",
+      "uploading": "Pujant la imatge…",
+      "reading": "Llegint el tiquet… {percent}%",
+      "detected": "Dades detectades del tiquet. Revisa-les abans de desar.",
+      "retake": "Fes servir una altra imatge",
+      "or": "o introdueix-la a mà"
+    }
   },
   "alerts": {
     "title": "Alertes",
@@ -205,6 +214,8 @@
     "emailInUse": "Aquest correu ja està registrat.",
     "emailNotConfirmed": "Confirma el teu correu abans d'iniciar la sessió.",
     "passwordTooShort": "La contrasenya ha de tenir almenys 6 caràcters.",
-    "budgetNameRequired": "Posa un nom al pressupost"
+    "budgetNameRequired": "Posa un nom al pressupost",
+    "uploadFailed": "No s'ha pogut pujar la imatge. Torna-ho a provar.",
+    "ocrFailed": "No s'ha pogut llegir el tiquet. Prova amb una altra foto o introdueix-la a mà."
   }
 }

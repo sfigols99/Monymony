@@ -151,7 +151,16 @@
     "pending": "pending",
     "fallbackName": "Expense",
     "budget": "Budget",
-    "noBudget": "No budget"
+    "noBudget": "No budget",
+    "scan": {
+      "hint": "Take a photo of the receipt and we'll fill in the expense. Review it before saving.",
+      "choose": "Take photo or upload image",
+      "uploading": "Uploading image…",
+      "reading": "Reading the receipt… {percent}%",
+      "detected": "Fields detected from the receipt. Review them before saving.",
+      "retake": "Use another image",
+      "or": "or enter it manually"
+    }
   },
   "alerts": {
     "title": "Alerts",
@@ -205,6 +214,8 @@
     "emailInUse": "That email is already registered.",
     "emailNotConfirmed": "Confirm your email before signing in.",
     "passwordTooShort": "The password must be at least 6 characters.",
-    "budgetNameRequired": "Give the budget a name"
+    "budgetNameRequired": "Give the budget a name",
+    "uploadFailed": "Couldn't upload the image. Please try again.",
+    "ocrFailed": "Couldn't read the receipt. Try another photo or enter it manually."
   }
 }

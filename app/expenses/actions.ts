@@ -22,6 +22,17 @@ const expenseSchema = z.object({
     .transform((v) => (v ? v : null)),
 });
 
+/** Extra fields only present when creating from a scanned receipt. */
+const createExtraSchema = z.object({
+  source: z.enum(["form", "ticket"]).default("form"),
+  receiptPath: z
+    .string()
+    .trim()
+    .max(400)
+    .optional()
+    .transform((v) => (v ? v : null)),
+});
+
 function parseExpense(formData: FormData) {
   return expenseSchema.safeParse({
     amount: formData.get("amount"),
@@ -48,6 +59,14 @@ export async function createExpense(
     return { error: parsed.error.issues[0].message };
   }
 
+  const extra = createExtraSchema.safeParse({
+    source: formData.get("source") ?? undefined,
+    receiptPath: formData.get("receiptPath"),
+  });
+  if (!extra.success) {
+    return { error: "invalidExpense" };
+  }
+
   const household = await getActiveHousehold();
   if (!household) return { error: "noActiveHousehold" };
   if (!isMember(household, parsed.data.paidBy)) {
@@ -59,6 +78,9 @@ export async function createExpense(
     data: { user },
   } = await supabase.auth.getUser();
 
+  // The user reviews the pre-filled form before saving, so receipt-sourced
+  // expenses are stored confirmed (status `pending` is reserved for a future
+  // automated/remote OCR provider that creates rows without immediate review).
   const { error } = await supabase.from("expenses").insert({
     household_id: household.id,
     amount: parsed.data.amount,
@@ -67,7 +89,8 @@ export async function createExpense(
     expense_date: parsed.data.expenseDate,
     paid_by: parsed.data.paidBy,
     description: parsed.data.description,
-    source: "form",
+    source: extra.data.source,
+    receipt_url: extra.data.receiptPath,
     status: "confirmed",
     created_by: user?.id ?? null,
   });

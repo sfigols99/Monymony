@@ -64,7 +64,22 @@ There is no test runner configured yet.
   icon/color) and optionally also a category. Server Actions in
   `app/expenses/actions.ts` (`createExpense`, `updateExpense`, `deleteExpense`)
   validate with Zod, check the payer is a household member, and revalidate both
-  `/expenses` and `/budget`. Form-sourced expenses are stored `confirmed`.
+  `/expenses` and `/budget`. `createExpense` also accepts `source`
+  (`form`/`ticket`) and `receiptPath`; expenses are stored `confirmed` (the user
+  reviews before saving — `pending` is reserved for a future automated provider).
+- **Receipt OCR** is **client-side and pluggable** (`lib/ocr/`): `OCRProvider`
+  interface (`types.ts`), EUR/es-ES parser (`parse.ts` → amount/date/merchant),
+  the default in-browser Tesseract.js provider (`tesseract.ts`, WASM/web worker,
+  dynamic-imported), and `index.ts`'s `getOCRProvider()` selector (env-swappable
+  for a future remote provider). UI: `components/ReceiptScanner.tsx` uploads the
+  image to the private `receipts` Storage bucket and OCRs it in the browser;
+  `components/NewExpense.tsx` wraps the scanner + `ExpenseForm`, seeding the form
+  via its `prefill`/`source`/`receiptPath` props (remounts on each scan with a
+  `key`). No OCR runs on the server — keeps Vercel free-tier cost at 0.
+- **Self-hosting:** `Dockerfile` builds a Next.js **standalone** image
+  (`output: "standalone"` in `next.config.ts`); `NEXT_PUBLIC_*` are build args.
+  `next.config.ts` also aliases `canvas`/`encoding` to `false` for the
+  tesseract.js browser bundle.
 - **Alerts** live at `/alerts`. `lib/alerts.ts` (`getAlerts`,
   `getTriggeredAlerts`) evaluates active alerts against the current month by
   **scope**: whole-household (`category_id`/`budget_id` null), per-category, or
@@ -142,11 +157,13 @@ split method), member-scoped, and drops the earlier `recurring_budgets`.
 `0004_budget_alerts.sql` adds `categories.budget_id` and `alerts.budget_id`
 (linking categories and alerts to budgets). `0005_budget_concept.sql` gives
 budgets an `icon`/`color` and adds `expenses.budget_id` (a budget is also an
-expense concept). The receipts/OCR migration (`0006`) is applied last, on its
-own branch.
+expense concept). `0006_receipts_storage.sql` adds the private `receipts`
+Storage bucket with member-scoped RLS on `storage.objects` (objects are laid out
+as `{household_id}/{file}`; the leading folder is checked with
+`is_household_member`) — applied last, for the receipt-OCR feature.
 
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`, `0003…`, `0004…`, `0005…`).
+(`0001…`, `0002…`, `0003…`, `0004…`, `0005…`, `0006…`).
 
 ## Environment
 

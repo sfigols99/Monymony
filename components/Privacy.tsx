@@ -2,7 +2,9 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
@@ -21,15 +23,42 @@ function usePrivacy(): PrivacyContextValue {
 /** The mask shown in place of hidden salary figures (bank style). */
 const MASK = "*****";
 
+/** localStorage key persisting the user's show/hide preference. */
+const STORAGE_KEY = "monymony:salaries-hidden";
+
 /**
  * Holds the "hide salaries" state for the dashboard. Hidden by default so
  * sensitive figures (salaries, budget base, contributions) aren't shown until
- * the user reveals them with the eye toggle.
+ * the user reveals them with the eye toggle. The choice is remembered in
+ * localStorage (and applied after mount to avoid a hydration mismatch), but the
+ * default on a fresh device stays hidden.
  */
 export function PrivacyProvider({ children }: { children: ReactNode }) {
   const [hidden, setHidden] = useState(true);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved === "false") setHidden(false);
+    } catch {
+      // localStorage unavailable (e.g. private mode) — keep the default.
+    }
+  }, []);
+
+  const toggle = useCallback(() => {
+    setHidden((h) => {
+      const next = !h;
+      try {
+        window.localStorage.setItem(STORAGE_KEY, String(next));
+      } catch {
+        // Ignore persistence failures.
+      }
+      return next;
+    });
+  }, []);
+
   return (
-    <PrivacyContext.Provider value={{ hidden, toggle: () => setHidden((h) => !h) }}>
+    <PrivacyContext.Provider value={{ hidden, toggle }}>
       {children}
     </PrivacyContext.Provider>
   );

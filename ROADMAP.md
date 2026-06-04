@@ -43,13 +43,13 @@ Objetivo de **coste 0** usando los planes gratuitos.
 - [x] Gasto agrupado por concepto en el mes
 - [x] Página `/budget`
 
-## Fase 3 — Conceptos (categorías) ✅
+## Fase 3 — Conceptos = Presupuestos ✅
 
-- [x] CRUD de conceptos por hogar (energía, supermercado, préstamos, impuestos, mascotas, electrodomésticos…)
-- [x] Selector de **color** (paleta)
-- [x] Selector de **icono** desde catálogo de Google Material Symbols
-- [x] Límite de gasto opcional por concepto
-- [x] Página `/categories` con alta, edición inline y borrado
+- [x] **Unificado**: el concepto de gasto ES el presupuesto (se elimina la capa
+  de "categorías" separada; migración `0006`)
+- [x] Cada presupuesto tiene nombre, **importe** (cuánto se puede gastar),
+  **color** e **icono** (Google Material Symbols)
+- [x] Los gastos y las alertas se asocian a un presupuesto; se gestionan en `/budget`
 
 ## Fase 4 — Gastos por formulario ✅
 

@@ -4,11 +4,12 @@ Guidance for Claude Code (claude.ai/code) when working in this repository.
 
 ## Project
 
-**Monymony** — a web app to manage **shared household expenses**. Members plan a
-monthly budget derived from the sum of their salaries (weighted by each member's
-percentage), record expenses by form or by **receipt photo (OCR)**, organize
-them with custom categories (color + Google Material icon), and get **alerts**
-when they overspend. Currency is **EUR (€)**.
+**Monymony** — a web app to manage **shared household expenses**. Members define
+**N named budgets** (the spending concepts: mortgage, groceries… each with an
+amount, icon, color and split method), record expenses against a budget by form
+or by **receipt photo (OCR)**, and get **alerts** when they overspend. The
+planned monthly total is the sum of budgets (or a salary-derived fallback).
+Currency is **EUR (€)**.
 
 See `ROADMAP.md` for the phased plan. The app is greenfield — most features
 beyond auth + the DB schema are not built yet.
@@ -58,26 +59,22 @@ There is no test runner configured yet.
   household with members and salary-derived contribution percentages. The home
   page (`app/page.tsx`) redirects to `/onboarding` when there's no household.
 - **Expenses** live at `/expenses`. `lib/expenses.ts` (`getExpenses`) lists a
-  month's expenses (joined with category, **budget** and payer profile via the
-  `expenses_paid_by_fkey` embed) with category/payer filters. An expense can be
-  assigned to a **budget** (the primary concept, shown with the budget's
-  icon/color) and optionally also a category. Server Actions in
-  `app/expenses/actions.ts` (`createExpense`, `updateExpense`, `deleteExpense`)
-  validate with Zod, check the payer is a household member, and revalidate both
-  `/expenses` and `/budget`. Form-sourced expenses are stored `confirmed`.
+  month's expenses (joined with **budget** and payer profile via the
+  `expenses_paid_by_fkey` embed) with budget/payer filters. An expense is
+  assigned to a **budget** (the concept, shown with the budget's icon/color).
+  Server Actions in `app/expenses/actions.ts` (`createExpense`, `updateExpense`,
+  `deleteExpense`) validate with Zod, check the payer is a household member, and
+  revalidate both `/expenses` and `/budget`. Form-sourced expenses are stored
+  `confirmed`.
 - **Alerts** live at `/alerts`. `lib/alerts.ts` (`getAlerts`,
   `getTriggeredAlerts`) evaluates active alerts against the current month by
-  **scope**: whole-household (`category_id`/`budget_id` null), per-category, or
-  **per budget** (`budget_id`). For `threshold_amount` it fires on the scope's
-  spend; for `threshold_percent` the base is the planned budget (household), the
-  category's `monthly_limit`, or the budget's `amount`. A budget's spend = the
-  confirmed expenses assigned to it directly (`expenses.budget_id`), falling
-  back to expenses whose category belongs to the budget (`categories.budget_id`).
-  Server Actions in `app/alerts/actions.ts` (`createAlert`, `updateAlert`,
-  `toggleAlert`, `deleteAlert`); the form posts a single `scope` field
-  (`""` | `cat:<id>` | `bud:<id>`). `AlertForm` groups categories and budgets in
-  the scope picker; `AlertBanner` shows triggered alerts on the dashboard and
-  `/alerts`.
+  **scope**: whole-household (`budget_id` null) or **per budget** (`budget_id`).
+  For `threshold_amount` it fires on the scope's spend; for `threshold_percent`
+  the base is the planned total (household) or the budget's `amount`. A budget's
+  spend = the confirmed `expenses.budget_id` assigned to it. Server Actions in
+  `app/alerts/actions.ts` (`createAlert`, `updateAlert`, `toggleAlert`,
+  `deleteAlert`); the form posts a single `scope` field (`""` | `bud:<id>`).
+  `AlertBanner` shows triggered alerts on the dashboard and `/alerts`.
 - **Budget** lives at `/budget`. A household defines **N named budgets**
   (`budgets` table: `name`, `amount`, `split` ∈ `equal` | `proportional`).
   `lib/budget.ts` (`getMonthlyBudget`) resolves the planned total by priority —
@@ -94,15 +91,13 @@ There is no test runner configured yet.
   (`normalizePeriod`, `formatPeriod`) live in `lib/period.ts`** (no server
   imports) so Client Components can use them; `lib/budget.ts` re-exports them for
   server callers.
-- **Category actions** are Server Actions in `app/categories/actions.ts`
-  (`createCategory`, `updateCategory`, `deleteCategory`). The `/categories`
-  page lists + edits them inline; a category can be assigned to a budget
-  (`categories.budget_id`, selectable in `CategoryForm`). Icon/color catalogs
-  live in `lib/icons.ts` (`EXPENSE_ICONS`, `CATEGORY_COLORS`); `lib/categories.ts`
-  has `getCategories` (joins the budget name).
+- Budgets (the concepts) carry an icon + color chosen with `BudgetLineForm`'s
+  pickers; icon/color catalogs live in `lib/icons.ts` (`EXPENSE_ICONS`,
+  `CATEGORY_COLORS`). There is **no separate categories entity** (removed in
+  `0006`).
 - **`lib/format.ts`** — `formatEuro` / `formatPercent` (es-ES locale).
 - Client UI bits live in `components/` (`SalaryForm`, `InviteCode`,
-  `CategoryForm`, `CategoryItem`, `IconPicker`, `ColorPicker`).
+  `IconPicker`, `ColorPicker`).
 - **Top loading bar:** `components/LoadingProvider.tsx` (mounted in
   `app/layout.tsx`) exposes a `useLoading()` context and a fixed top progress bar
   (semi-transparent indigo). Internal `<a>` clicks start it automatically; it
@@ -122,14 +117,10 @@ Schema and RLS live in `supabase/migrations/`. Core tables:
 - `profiles` — 1:1 with `auth.users` (auto-created via trigger on signup).
 - `households` — a house/group, has an `owner_id`.
 - `household_members` — membership + `monthly_salary`; budget % is derived from salaries.
-- `categories` — user-defined concepts (`name`, `color`, `icon`, optional `monthly_limit`).
 - `monthly_budgets` — per-month manual override of the planned total (`is_manual`).
-- `budgets` — named recurring budgets (`name`, `amount`, `split` equal/proportional, `icon`, `color`); the planned total is their sum. Also act as an expense concept.
-- `categories.budget_id` — optional link assigning a category to a budget.
-- `alerts.budget_id` — optional link scoping an alert to a budget.
-- `expenses.budget_id` — optional direct assignment of an expense to a budget (concept).
-- `expenses` — `amount`, `category_id`, `expense_date`, `source` (`form`/`ticket`), `status` (`pending`/`confirmed`), `receipt_url`.
-- `alerts` — thresholds (`threshold_percent` or `threshold_amount`); `category_id` null = whole-household.
+- `budgets` — named recurring budgets (`name`, `amount`, `split` equal/proportional, `icon`, `color`); the planned total is their sum. **A budget IS the expense concept** (its `amount` = how much you can spend on it).
+- `expenses` — `amount`, `budget_id` (the concept), `expense_date`, `source` (`form`/`ticket`), `status` (`pending`/`confirmed`), `receipt_url`.
+- `alerts` — `budget_id` (null = whole-household) + thresholds (`threshold_percent` or `threshold_amount`).
 
 **RLS:** every data table is scoped to household membership via the
 `is_household_member(household_id)` SQL helper. When adding tables, enable RLS
@@ -139,14 +130,15 @@ SECURITY DEFINER RPCs (see `0002_households_invites.sql`).
 
 `0003_budgets.sql` adds the `budgets` table (named recurring budgets with a
 split method), member-scoped, and drops the earlier `recurring_budgets`.
-`0004_budget_alerts.sql` adds `categories.budget_id` and `alerts.budget_id`
-(linking categories and alerts to budgets). `0005_budget_concept.sql` gives
-budgets an `icon`/`color` and adds `expenses.budget_id` (a budget is also an
-expense concept). The receipts/OCR migration (`0006`) is applied last, on its
-own branch.
+`0004_budget_alerts.sql` and `0005_budget_concept.sql` added the (now removed)
+category↔budget links, budget icon/color and `expenses.budget_id`.
+`0006_unify_concepts.sql` **removes the `categories` table entirely** — a budget
+is now the sole expense concept — and drops `expenses.category_id` /
+`alerts.category_id` (backfilling `expenses.budget_id` from the category's budget
+first). The receipts/OCR migration becomes `0007` and is applied last.
 
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`, `0003…`, `0004…`, `0005…`).
+(`0001…`, `0002…`, `0003…`, `0004…`, `0005…`, `0006…`).
 
 ## Environment
 

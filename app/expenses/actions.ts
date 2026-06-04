@@ -10,7 +10,6 @@ export type ExpenseActionState = { error: string } | { ok: true } | null;
 
 const expenseSchema = z.object({
   amount: z.coerce.number().positive("amountPositive"),
-  categoryId: z.union([z.literal(""), z.string().uuid()]).transform((v) => (v === "" ? null : v)),
   budgetId: z.union([z.literal(""), z.string().uuid()]).transform((v) => (v === "" ? null : v)),
   expenseDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "dateInvalid"),
   paidBy: z.union([z.literal(""), z.string().uuid()]).transform((v) => (v === "" ? null : v)),
@@ -25,7 +24,6 @@ const expenseSchema = z.object({
 function parseExpense(formData: FormData) {
   return expenseSchema.safeParse({
     amount: formData.get("amount"),
-    categoryId: formData.get("categoryId"),
     budgetId: formData.get("budgetId") ?? "",
     expenseDate: formData.get("expenseDate"),
     paidBy: formData.get("paidBy"),
@@ -62,7 +60,6 @@ export async function createExpense(
   const { error } = await supabase.from("expenses").insert({
     household_id: household.id,
     amount: parsed.data.amount,
-    category_id: parsed.data.categoryId,
     budget_id: parsed.data.budgetId,
     expense_date: parsed.data.expenseDate,
     paid_by: parsed.data.paidBy,
@@ -103,7 +100,6 @@ export async function updateExpense(
     .from("expenses")
     .update({
       amount: parsed.data.amount,
-      category_id: parsed.data.categoryId,
       budget_id: parsed.data.budgetId,
       expense_date: parsed.data.expenseDate,
       paid_by: parsed.data.paidBy,

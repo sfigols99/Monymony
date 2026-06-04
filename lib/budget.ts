@@ -14,14 +14,6 @@ export type MemberContribution = {
   isCurrentUser: boolean;
 };
 
-export type SpentByCategory = {
-  categoryId: string | null;
-  name: string;
-  color: string;
-  icon: string;
-  spent: number;
-};
-
 /** How a budget's amount is divided among household members. */
 export type BudgetSplit = "equal" | "proportional";
 
@@ -69,7 +61,6 @@ export type MonthlyBudget = {
   /** spent / plannedTotal, 0–100 (or 0 when no budget). */
   usedPercent: number;
   contributions: MemberContribution[];
-  spentByCategory: SpentByCategory[];
 };
 
 function monthRange(year: number, month: number) {
@@ -82,7 +73,7 @@ function monthRange(year: number, month: number) {
 /**
  * Build the monthly budget snapshot for a household: planned total (manual
  * override or salary-derived), confirmed spending, remaining, per-member
- * contributions and spend grouped by category.
+ * contributions and per-budget spend.
  */
 export async function getMonthlyBudget(
   household: ActiveHousehold,
@@ -158,50 +149,27 @@ export async function getMonthlyBudget(
   }
   const isManual = source === "manual";
 
-  // Confirmed expenses in the period, joined with their category.
+  // Confirmed expenses in the period, summed per budget (the concept).
   const { start, end } = monthRange(year, month);
   const { data: expenseRows } = await supabase
     .from("expenses")
-    .select("amount, category_id, budget_id, categories(name, color, icon, budget_id)")
+    .select("amount, budget_id")
     .eq("household_id", household.id)
     .eq("status", "confirmed")
     .gte("expense_date", start)
     .lt("expense_date", end);
 
-  type ExpCat = { name: string; color: string; icon: string; budget_id: string | null };
-  type ExpRow = {
-    amount: number | string;
-    category_id: string | null;
-    budget_id: string | null;
-    categories: ExpCat[] | ExpCat | null;
-  };
+  type ExpRow = { amount: number | string; budget_id: string | null };
 
   const rows = (expenseRows ?? []) as ExpRow[];
   let spent = 0;
-  const byCat = new Map<string, SpentByCategory>();
   const spentByBudget = new Map<string, number>();
 
   for (const r of rows) {
     const amount = Number(r.amount) || 0;
     spent += amount;
-    const cat = Array.isArray(r.categories) ? r.categories[0] : r.categories;
-    // Direct budget assignment wins; otherwise fall back to the category's budget.
-    const targetBudget = r.budget_id ?? cat?.budget_id ?? null;
-    if (targetBudget) {
-      spentByBudget.set(targetBudget, (spentByBudget.get(targetBudget) ?? 0) + amount);
-    }
-    const key = r.category_id ?? "__none__";
-    const existing = byCat.get(key);
-    if (existing) {
-      existing.spent += amount;
-    } else {
-      byCat.set(key, {
-        categoryId: r.category_id,
-        name: cat?.name ?? "Sin concepto",
-        color: cat?.color ?? "#9ca3af",
-        icon: cat?.icon ?? "help",
-        spent: amount,
-      });
+    if (r.budget_id) {
+      spentByBudget.set(r.budget_id, (spentByBudget.get(r.budget_id) ?? 0) + amount);
     }
   }
 
@@ -230,8 +198,6 @@ export async function getMonthlyBudget(
     };
   });
 
-  const spentByCategory = [...byCat.values()].sort((a, b) => b.spent - a.spent);
-
   return {
     year,
     month,
@@ -244,7 +210,6 @@ export async function getMonthlyBudget(
     remaining: plannedTotal - spent,
     usedPercent: plannedTotal > 0 ? (spent / plannedTotal) * 100 : 0,
     contributions,
-    spentByCategory,
   };
 }
 

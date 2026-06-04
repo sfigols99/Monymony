@@ -11,11 +11,9 @@ import { type ExpenseOption } from "./ExpenseForm";
 /** A single alert rule with toggle, inline edit and delete. */
 export function AlertItem({
   alert,
-  categories,
   budgets = [],
 }: {
   alert: Alert;
-  categories: ExpenseOption[];
   budgets?: ExpenseOption[];
 }) {
   const t = useTranslations("alerts");
@@ -27,12 +25,10 @@ export function AlertItem({
     return (
       <li className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
         <AlertForm
-          categories={categories}
           budgets={budgets}
           initial={{
             id: alert.id,
             name: alert.name,
-            categoryId: alert.categoryId,
             budgetId: alert.budgetId,
             thresholdPercent: alert.thresholdPercent,
             thresholdAmount: alert.thresholdAmount,
@@ -49,18 +45,9 @@ export function AlertItem({
       : alert.thresholdPercent != null
         ? formatPercent(alert.thresholdPercent)
         : "—";
-  const scope =
-    alert.budgetName ?? alert.categoryName ?? t("wholeHousehold");
-  const iconColor = alert.budgetId
-    ? "#6366f1"
-    : alert.categoryId
-      ? alert.categoryColor
-      : "#9ca3af";
-  const iconName = alert.budgetId
-    ? "savings"
-    : alert.categoryId
-      ? alert.categoryIcon
-      : "notifications";
+  const scope = alert.budgetName ?? t("wholeHousehold");
+  const iconColor = alert.budgetId ? "#6366f1" : "#9ca3af";
+  const iconName = alert.budgetId ? "savings" : "notifications";
 
   return (
     <li

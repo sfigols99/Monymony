@@ -12,7 +12,6 @@ import { type ExpenseOption } from "./ExpenseForm";
 export type AlertInitial = {
   id: string;
   name: string;
-  categoryId: string | null;
   budgetId: string | null;
   thresholdPercent: number | null;
   thresholdAmount: number | null;
@@ -20,12 +19,10 @@ export type AlertInitial = {
 
 /** Create or edit an alert rule. */
 export function AlertForm({
-  categories,
   budgets = [],
   initial,
   onDone,
 }: {
-  categories: ExpenseOption[];
   budgets?: ExpenseOption[];
   initial?: AlertInitial;
   onDone?: () => void;
@@ -58,11 +55,7 @@ export function AlertForm({
   const defaultValue =
     initial?.thresholdAmount ?? initial?.thresholdPercent ?? "";
 
-  const defaultScope = initial?.budgetId
-    ? `bud:${initial.budgetId}`
-    : initial?.categoryId
-      ? `cat:${initial.categoryId}`
-      : "";
+  const defaultScope = initial?.budgetId ? `bud:${initial.budgetId}` : "";
 
   return (
     <form ref={formRef} action={formAction} className="space-y-4">
@@ -95,24 +88,11 @@ export function AlertForm({
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
         >
           <option value="">{t("wholeHousehold")}</option>
-          {budgets.length > 0 && (
-            <optgroup label={t("scopeBudgets")}>
-              {budgets.map((b) => (
-                <option key={b.id} value={`bud:${b.id}`}>
-                  {b.label}
-                </option>
-              ))}
-            </optgroup>
-          )}
-          {categories.length > 0 && (
-            <optgroup label={t("scopeCategories")}>
-              {categories.map((c) => (
-                <option key={c.id} value={`cat:${c.id}`}>
-                  {c.label}
-                </option>
-              ))}
-            </optgroup>
-          )}
+          {budgets.map((b) => (
+            <option key={b.id} value={`bud:${b.id}`}>
+              {b.label}
+            </option>
+          ))}
         </select>
       </div>
 

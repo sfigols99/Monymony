@@ -162,38 +162,6 @@ export default async function BudgetPage({
           </ul>
         )}
       </section>
-
-      {/* Spend by category */}
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
-        <h2 className="mb-4 text-lg font-semibold">{t("byCategoryTitle")}</h2>
-        {budget.spentByCategory.length === 0 ? (
-          <p className="text-sm text-neutral-400">{t("byCategoryEmpty")}</p>
-        ) : (
-          <ul className="space-y-2">
-            {budget.spentByCategory.map((c) => (
-              <li
-                key={c.categoryId ?? "none"}
-                className="flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-white"
-                    style={{ backgroundColor: c.color }}
-                  >
-                    <span className="material-symbols-rounded text-[20px]">
-                      {c.icon}
-                    </span>
-                  </span>
-                  <span className="text-sm font-medium">{c.name}</span>
-                </div>
-                <span className="text-sm font-semibold">
-                  {formatEuro(c.spent)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
     </main>
   );
 }

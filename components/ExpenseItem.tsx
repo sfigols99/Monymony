@@ -16,12 +16,10 @@ function shortDate(iso: string, locale: string) {
 /** A single expense row with inline edit + delete. */
 export function ExpenseItem({
   expense,
-  categories,
   budgets = [],
   members,
 }: {
   expense: Expense;
-  categories: ExpenseOption[];
   budgets?: ExpenseOption[];
   members: ExpenseOption[];
 }) {
@@ -35,13 +33,11 @@ export function ExpenseItem({
     return (
       <li className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
         <ExpenseForm
-          categories={categories}
           budgets={budgets}
           members={members}
           initial={{
             id: expense.id,
             amount: expense.amount,
-            categoryId: expense.categoryId,
             budgetId: expense.budgetId,
             expenseDate: expense.expenseDate,
             paidBy: expense.paidById,
@@ -58,23 +54,19 @@ export function ExpenseItem({
       <div className="flex min-w-0 items-center gap-3">
         <span
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white"
-          style={{ backgroundColor: expense.budgetColor ?? expense.categoryColor }}
+          style={{ backgroundColor: expense.budgetColor }}
         >
           <span className="material-symbols-rounded text-[22px]">
-            {expense.budgetIcon ?? expense.categoryIcon}
+            {expense.budgetIcon}
           </span>
         </span>
         <div className="min-w-0">
           <p className="truncate font-medium">
-            {expense.description ||
-              expense.budgetName ||
-              expense.categoryName ||
-              t("fallbackName")}
+            {expense.description || expense.budgetName || t("fallbackName")}
           </p>
           <p className="truncate text-xs text-neutral-400">
             {shortDate(expense.expenseDate, locale)}
             {expense.budgetName && ` · ${expense.budgetName}`}
-            {expense.categoryName && ` · ${expense.categoryName}`}
             {expense.paidByName && ` · ${expense.paidByName}`}
             {expense.status === "pending" && (
               <span className="ml-1 rounded bg-amber-100 px-1 py-0.5 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">

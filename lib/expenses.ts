@@ -5,14 +5,10 @@ export type Expense = {
   amount: number;
   description: string | null;
   expenseDate: string; // ISO date (YYYY-MM-DD)
-  categoryId: string | null;
-  categoryName: string | null;
-  categoryColor: string;
-  categoryIcon: string;
   budgetId: string | null;
   budgetName: string | null;
-  budgetColor: string | null;
-  budgetIcon: string | null;
+  budgetColor: string;
+  budgetIcon: string;
   paidById: string | null;
   paidByName: string | null;
   source: "form" | "ticket";
@@ -24,15 +20,10 @@ type ExpenseRow = {
   amount: number | string;
   description: string | null;
   expense_date: string;
-  category_id: string | null;
   budget_id: string | null;
   paid_by: string | null;
   source: string;
   status: string;
-  categories:
-    | { name: string; color: string; icon: string }[]
-    | { name: string; color: string; icon: string }
-    | null;
   budgets:
     | { name: string; color: string; icon: string }[]
     | { name: string; color: string; icon: string }
@@ -46,7 +37,7 @@ type ExpenseRow = {
 export type ExpenseFilters = {
   year: number;
   month: number;
-  categoryId?: string;
+  budgetId?: string;
   paidBy?: string;
 };
 
@@ -68,8 +59,8 @@ export async function getExpenses(
   let query = supabase
     .from("expenses")
     .select(
-      "id, amount, description, expense_date, category_id, budget_id, paid_by, source, status, " +
-        "categories(name, color, icon), budgets(name, color, icon), " +
+      "id, amount, description, expense_date, budget_id, paid_by, source, status, " +
+        "budgets(name, color, icon), " +
         "paid_by_profile:profiles!expenses_paid_by_fkey(full_name, email)",
     )
     .eq("household_id", householdId)
@@ -78,13 +69,12 @@ export async function getExpenses(
     .order("expense_date", { ascending: false })
     .order("created_at", { ascending: false });
 
-  if (filters.categoryId) query = query.eq("category_id", filters.categoryId);
+  if (filters.budgetId) query = query.eq("budget_id", filters.budgetId);
   if (filters.paidBy) query = query.eq("paid_by", filters.paidBy);
 
   const { data } = await query;
 
   return ((data ?? []) as unknown as ExpenseRow[]).map((r) => {
-    const cat = Array.isArray(r.categories) ? r.categories[0] : r.categories;
     const bud = Array.isArray(r.budgets) ? r.budgets[0] : r.budgets;
     const payer = Array.isArray(r.paid_by_profile)
       ? r.paid_by_profile[0]
@@ -94,14 +84,10 @@ export async function getExpenses(
       amount: Number(r.amount) || 0,
       description: r.description,
       expenseDate: r.expense_date,
-      categoryId: r.category_id,
-      categoryName: cat?.name ?? null,
-      categoryColor: cat?.color ?? "#9ca3af",
-      categoryIcon: cat?.icon ?? "help",
       budgetId: r.budget_id,
       budgetName: bud?.name ?? null,
-      budgetColor: bud?.color ?? null,
-      budgetIcon: bud?.icon ?? null,
+      budgetColor: bud?.color ?? "#6366f1",
+      budgetIcon: bud?.icon ?? "savings",
       paidById: r.paid_by,
       paidByName: payer?.full_name || payer?.email || null,
       source: r.source === "ticket" ? "ticket" : "form",

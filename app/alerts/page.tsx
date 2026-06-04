@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getActiveHousehold } from "@/lib/household";
-import { getCategories } from "@/lib/categories";
 import { getAlerts, getTriggeredAlerts } from "@/lib/alerts";
 import { normalizePeriod, getBudgets } from "@/lib/budget";
 import { AlertForm } from "@/components/AlertForm";
@@ -18,17 +17,12 @@ export default async function AlertsPage() {
 
   const t = await getTranslations("alerts");
   const { year, month } = normalizePeriod();
-  const [categories, budgets, alerts, triggered] = await Promise.all([
-    getCategories(household.id),
+  const [budgets, alerts, triggered] = await Promise.all([
     getBudgets(household.id),
     getAlerts(household.id),
     getTriggeredAlerts(household, year, month),
   ]);
 
-  const categoryOptions: ExpenseOption[] = categories.map((c) => ({
-    id: c.id,
-    label: c.name,
-  }));
   const budgetOptions: ExpenseOption[] = budgets.map((b) => ({
     id: b.id,
     label: b.name,
@@ -49,7 +43,7 @@ export default async function AlertsPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
           <h2 className="mb-4 text-lg font-semibold">{t("newTitle")}</h2>
-          <AlertForm categories={categoryOptions} budgets={budgetOptions} />
+          <AlertForm budgets={budgetOptions} />
         </section>
 
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
@@ -64,12 +58,7 @@ export default async function AlertsPage() {
           ) : (
             <ul className="space-y-2">
               {alerts.map((a) => (
-                <AlertItem
-                  key={a.id}
-                  alert={a}
-                  categories={categoryOptions}
-                  budgets={budgetOptions}
-                />
+                <AlertItem key={a.id} alert={a} budgets={budgetOptions} />
               ))}
             </ul>
           )}

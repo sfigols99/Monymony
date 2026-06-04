@@ -13,17 +13,15 @@ const uuid = z.string().uuid();
 const alertSchema = z
   .object({
     name: z.string().trim().min(1, "alertNameRequired").max(60),
-    // Scope encodes the target: "" = whole household, "cat:<id>", "bud:<id>".
+    // Scope encodes the target: "" = whole household, "bud:<id>" = a budget.
     scope: z.string().default(""),
     thresholdType: z.enum(["percent", "amount"]),
     thresholdValue: z.coerce.number().positive("thresholdPositive"),
   })
   .transform((data) => {
-    const catMatch = data.scope.startsWith("cat:") ? data.scope.slice(4) : null;
     const budMatch = data.scope.startsWith("bud:") ? data.scope.slice(4) : null;
     return {
       name: data.name,
-      categoryId: catMatch && uuid.safeParse(catMatch).success ? catMatch : null,
       budgetId: budMatch && uuid.safeParse(budMatch).success ? budMatch : null,
       thresholdPercent: data.thresholdType === "percent" ? data.thresholdValue : null,
       thresholdAmount: data.thresholdType === "amount" ? data.thresholdValue : null,
@@ -50,7 +48,6 @@ export async function createAlert(
   const household = await getActiveHousehold();
   if (!household) return { error: "noActiveHousehold" };
 
-  // A per-category percent threshold needs the category to have a limit.
   const supabase = await createClient();
   const {
     data: { user },
@@ -59,7 +56,6 @@ export async function createAlert(
   const { error } = await supabase.from("alerts").insert({
     household_id: household.id,
     name: parsed.data.name,
-    category_id: parsed.data.categoryId,
     budget_id: parsed.data.budgetId,
     threshold_percent: parsed.data.thresholdPercent,
     threshold_amount: parsed.data.thresholdAmount,
@@ -90,7 +86,6 @@ export async function updateAlert(
     .from("alerts")
     .update({
       name: parsed.data.name,
-      category_id: parsed.data.categoryId,
       budget_id: parsed.data.budgetId,
       threshold_percent: parsed.data.thresholdPercent,
       threshold_amount: parsed.data.thresholdAmount,

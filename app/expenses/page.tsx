@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getActiveHousehold } from "@/lib/household";
-import { getCategories } from "@/lib/categories";
 import { getExpenses } from "@/lib/expenses";
 import { normalizePeriod, formatPeriod, getBudgets } from "@/lib/budget";
 import { formatEuro } from "@/lib/format";
@@ -16,7 +15,7 @@ export default async function ExpensesPage({
   searchParams: Promise<{
     year?: string;
     month?: string;
-    categoryId?: string;
+    budgetId?: string;
     paidBy?: string;
   }>;
 }) {
@@ -34,21 +33,16 @@ export default async function ExpensesPage({
     sp.month ? Number(sp.month) : undefined,
   );
 
-  const [categories, budgets, expenses] = await Promise.all([
-    getCategories(household.id),
+  const [budgets, expenses] = await Promise.all([
     getBudgets(household.id),
     getExpenses(household.id, {
       year,
       month,
-      categoryId: sp.categoryId || undefined,
+      budgetId: sp.budgetId || undefined,
       paidBy: sp.paidBy || undefined,
     }),
   ]);
 
-  const categoryOptions: ExpenseOption[] = categories.map((c) => ({
-    id: c.id,
-    label: c.name,
-  }));
   const budgetOptions: ExpenseOption[] = budgets.map((b) => ({
     id: b.id,
     label: b.name,
@@ -84,19 +78,15 @@ export default async function ExpensesPage({
         {/* New expense */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
           <h2 className="mb-4 text-lg font-semibold">{t("newTitle")}</h2>
-          {categoryOptions.length === 0 && (
+          {budgetOptions.length === 0 && (
             <p className="mb-3 text-sm text-amber-600">
-              {t("noCategoriesWarn")}{" "}
-              <Link href="/categories" className="underline">
-                {t("createSome")}
+              {t("noBudgetsWarn")}{" "}
+              <Link href="/budget" className="underline">
+                {t("createBudgets")}
               </Link>
             </p>
           )}
-          <ExpenseForm
-            categories={categoryOptions}
-            budgets={budgetOptions}
-            members={memberOptions}
-          />
+          <ExpenseForm budgets={budgetOptions} members={memberOptions} />
         </section>
 
         {/* List + filters */}
@@ -115,9 +105,9 @@ export default async function ExpensesPage({
             <ExpenseFilters
               year={year}
               month={month}
-              categoryId={sp.categoryId || undefined}
+              budgetId={sp.budgetId || undefined}
               paidBy={sp.paidBy || undefined}
-              categories={categoryOptions}
+              budgets={budgetOptions}
               members={memberOptions}
             />
           </div>
@@ -130,7 +120,6 @@ export default async function ExpensesPage({
                 <ExpenseItem
                   key={e.id}
                   expense={e}
-                  categories={categoryOptions}
                   budgets={budgetOptions}
                   members={memberOptions}
                 />

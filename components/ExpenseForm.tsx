@@ -13,7 +13,6 @@ export type ExpenseOption = { id: string; label: string };
 export type ExpenseInitial = {
   id: string;
   amount: number;
-  categoryId: string | null;
   budgetId: string | null;
   expenseDate: string;
   paidBy: string | null;
@@ -31,13 +30,11 @@ function todayIso() {
  * resets on success.
  */
 export function ExpenseForm({
-  categories,
   budgets = [],
   members,
   initial,
   onDone,
 }: {
-  categories: ExpenseOption[];
   budgets?: ExpenseOption[];
   members: ExpenseOption[];
   initial?: ExpenseInitial;
@@ -117,25 +114,6 @@ export function ExpenseForm({
       </div>
 
       <div className="flex flex-wrap gap-4">
-        <div className="flex-1">
-          <label htmlFor="exp-cat" className="mb-1 block text-sm font-medium">
-            {t("category")}{" "}
-            <span className="font-normal text-neutral-400">— {tc("optional")}</span>
-          </label>
-          <select
-            id="exp-cat"
-            name="categoryId"
-            defaultValue={initial?.categoryId ?? ""}
-            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
-          >
-            <option value="">{t("noCategory")}</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </div>
         <div className="flex-1">
           <label htmlFor="exp-payer" className="mb-1 block text-sm font-medium">
             {t("paidBy")}

@@ -6,22 +6,22 @@ import { type ExpenseOption } from "./ExpenseForm";
 import { useLoading } from "./LoadingProvider";
 
 /**
- * Month + category + payer filters. Navigates by updating the query string so
- * the Server Component re-queries with the new filters.
+ * Month + budget + payer filters. Navigates by updating the query string so the
+ * Server Component re-queries with the new filters.
  */
 export function ExpenseFilters({
   year,
   month,
-  categoryId,
+  budgetId,
   paidBy,
-  categories,
+  budgets,
   members,
 }: {
   year: number;
   month: number;
-  categoryId?: string;
+  budgetId?: string;
   paidBy?: string;
-  categories: ExpenseOption[];
+  budgets: ExpenseOption[];
   members: ExpenseOption[];
 }) {
   const t = useTranslations("expenses");
@@ -33,13 +33,13 @@ export function ExpenseFilters({
     router.push(url);
   }
 
-  function go(next: Partial<{ year: number; month: number; categoryId: string; paidBy: string }>) {
+  function go(next: Partial<{ year: number; month: number; budgetId: string; paidBy: string }>) {
     const params = new URLSearchParams();
     params.set("year", String(next.year ?? year));
     params.set("month", String(next.month ?? month));
-    const cat = next.categoryId ?? categoryId;
+    const bud = next.budgetId ?? budgetId;
     const payer = next.paidBy ?? paidBy;
-    if (cat) params.set("categoryId", cat);
+    if (bud) params.set("budgetId", bud);
     if (payer) params.set("paidBy", payer);
     navigate(`/expenses?${params.toString()}`);
   }
@@ -65,19 +65,19 @@ export function ExpenseFilters({
         />
       </div>
       <div>
-        <label htmlFor="f-cat" className="mb-1 block text-xs font-medium text-neutral-500">
-          {t("filterCategory")}
+        <label htmlFor="f-bud" className="mb-1 block text-xs font-medium text-neutral-500">
+          {t("budget")}
         </label>
         <select
-          id="f-cat"
-          value={categoryId ?? ""}
-          onChange={(e) => go({ categoryId: e.target.value })}
+          id="f-bud"
+          value={budgetId ?? ""}
+          onChange={(e) => go({ budgetId: e.target.value })}
           className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
         >
           <option value="">{t("filterAll")}</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.label}
+          {budgets.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.label}
             </option>
           ))}
         </select>
@@ -100,7 +100,7 @@ export function ExpenseFilters({
           ))}
         </select>
       </div>
-      {(categoryId || paidBy) && (
+      {(budgetId || paidBy) && (
         <button
           type="button"
           onClick={() => navigate(`/expenses?year=${year}&month=${month}`)}

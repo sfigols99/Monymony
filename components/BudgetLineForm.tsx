@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   createBudget,
@@ -8,6 +8,9 @@ import {
   type BudgetActionState,
 } from "@/app/budget/actions";
 import type { Budget } from "@/lib/budget";
+import { CATEGORY_COLORS } from "@/lib/icons";
+import { IconPicker } from "./IconPicker";
+import { ColorPicker } from "./ColorPicker";
 
 /**
  * Create or edit a named budget (name + amount + split method). With `initial`
@@ -29,11 +32,17 @@ export function BudgetLineForm({
     BudgetActionState,
     FormData
   >(action, null);
+  const [color, setColor] = useState(initial?.color ?? "#6366f1");
+  const [icon, setIcon] = useState(initial?.icon ?? "savings");
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (state && "ok" in state && state.ok) {
-      if (!editing) formRef.current?.reset();
+      if (!editing) {
+        formRef.current?.reset();
+        setColor("#6366f1");
+        setIcon("savings");
+      }
       onDone?.();
     }
   }, [state, editing, onDone]);
@@ -41,9 +50,17 @@ export function BudgetLineForm({
   return (
     <form ref={formRef} action={formAction} className="space-y-3">
       {editing && <input type="hidden" name="id" value={initial!.id} />}
+      <input type="hidden" name="icon" value={icon} />
+      <input type="hidden" name="color" value={color} />
 
-      <div className="flex flex-wrap gap-3">
-        <div className="flex-1 min-w-[12rem]">
+      <div className="flex flex-wrap items-end gap-3">
+        <span
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white"
+          style={{ backgroundColor: color }}
+        >
+          <span className="material-symbols-rounded text-[26px]">{icon}</span>
+        </span>
+        <div className="flex-1 min-w-[10rem]">
           <label htmlFor="b-name" className="mb-1 block text-sm font-medium">
             {t("budgetName")}
           </label>
@@ -90,6 +107,16 @@ export function BudgetLineForm({
           <option value="equal">{t("splitEqual")}</option>
         </select>
         <p className="mt-1 text-xs text-neutral-400">{t("splitHint")}</p>
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium">{t("color")}</label>
+        <ColorPicker value={color} onChange={setColor} colors={CATEGORY_COLORS} />
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium">{t("icon")}</label>
+        <IconPicker value={icon} onChange={setIcon} color={color} />
       </div>
 
       {state && "error" in state && (

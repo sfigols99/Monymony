@@ -58,7 +58,9 @@
     "navAlerts": "Alertas",
     "navAlertsDesc": "Avisos cuando se gasta de más",
     "nextHint": "🚧 Siguiente: lectura de tickets por OCR y predicción de gastos (ver ROADMAP.md).",
-    "leaveHousehold": "Salir del hogar"
+    "leaveHousehold": "Salir del hogar",
+    "showSalaries": "Mostrar salarios",
+    "hideSalaries": "Ocultar salarios"
   },
   "salary": {
     "label": "Tu salario mensual (€)"
@@ -102,7 +104,10 @@
     "byCategoryEmpty": "Aún no hay gastos confirmados este mes.",
     "prevMonth": "Mes anterior",
     "nextMonth": "Mes siguiente",
-    "you": "(tú)"
+    "you": "(tú)",
+    "spentOf": "Gastado {spent} de {amount}",
+    "icon": "Icono",
+    "color": "Color"
   },
   "categories": {
     "title": "Conceptos",
@@ -117,7 +122,9 @@
     "create": "Crear concepto",
     "yoursTitle": "Tus conceptos",
     "empty": "Aún no hay conceptos. Crea el primero (energía, supermercado, préstamos…).",
-    "limitLabel": "Límite {amount}/mes"
+    "limitLabel": "Límite {amount}/mes",
+    "budget": "Presupuesto",
+    "noBudget": "Sin presupuesto"
   },
   "expenses": {
     "title": "Gastos",
@@ -142,7 +149,9 @@
     "clearFilters": "Limpiar filtros",
     "emptyFiltered": "No hay gastos con estos filtros.",
     "pending": "pendiente",
-    "fallbackName": "Gasto"
+    "fallbackName": "Gasto",
+    "budget": "Presupuesto",
+    "noBudget": "Sin presupuesto"
   },
   "alerts": {
     "title": "Alertas",
@@ -155,7 +164,7 @@
     "threshold": "Umbral",
     "thresholdPercent": "% del presupuesto/límite",
     "thresholdAmount": "€ (importe absoluto)",
-    "hintPercent": "Salta al alcanzar ese % del presupuesto del hogar (o del límite del concepto).",
+    "hintPercent": "Salta al alcanzar ese % del límite del ámbito elegido (presupuesto del hogar, un presupuesto o el límite del concepto).",
     "hintAmount": "Salta cuando el gasto del mes alcanza ese importe.",
     "create": "Crear alerta",
     "yoursTitle": "Tus alertas",
@@ -167,7 +176,9 @@
     "thresholdLabel": "umbral {value}",
     "bannerOne": "1 alerta activada",
     "bannerMany": "{count} alertas activadas",
-    "bannerLine": "{name} — {scope}: {spent} de {limit} ({percent})"
+    "bannerLine": "{name} — {scope}: {spent} de {limit} ({percent})",
+    "scopeBudgets": "Presupuestos",
+    "scopeCategories": "Conceptos"
   },
   "errors": {
     "generic": "Algo ha ido mal. Inténtalo de nuevo.",

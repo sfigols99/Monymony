@@ -17,10 +17,12 @@ function shortDate(iso: string, locale: string) {
 export function ExpenseItem({
   expense,
   categories,
+  budgets = [],
   members,
 }: {
   expense: Expense;
   categories: ExpenseOption[];
+  budgets?: ExpenseOption[];
   members: ExpenseOption[];
 }) {
   const t = useTranslations("expenses");
@@ -34,11 +36,13 @@ export function ExpenseItem({
       <li className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
         <ExpenseForm
           categories={categories}
+          budgets={budgets}
           members={members}
           initial={{
             id: expense.id,
             amount: expense.amount,
             categoryId: expense.categoryId,
+            budgetId: expense.budgetId,
             expenseDate: expense.expenseDate,
             paidBy: expense.paidById,
             description: expense.description,
@@ -54,18 +58,22 @@ export function ExpenseItem({
       <div className="flex min-w-0 items-center gap-3">
         <span
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white"
-          style={{ backgroundColor: expense.categoryColor }}
+          style={{ backgroundColor: expense.budgetColor ?? expense.categoryColor }}
         >
           <span className="material-symbols-rounded text-[22px]">
-            {expense.categoryIcon}
+            {expense.budgetIcon ?? expense.categoryIcon}
           </span>
         </span>
         <div className="min-w-0">
           <p className="truncate font-medium">
-            {expense.description || expense.categoryName || t("fallbackName")}
+            {expense.description ||
+              expense.budgetName ||
+              expense.categoryName ||
+              t("fallbackName")}
           </p>
           <p className="truncate text-xs text-neutral-400">
             {shortDate(expense.expenseDate, locale)}
+            {expense.budgetName && ` · ${expense.budgetName}`}
             {expense.categoryName && ` · ${expense.categoryName}`}
             {expense.paidByName && ` · ${expense.paidByName}`}
             {expense.status === "pending" && (

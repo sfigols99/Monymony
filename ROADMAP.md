@@ -61,7 +61,10 @@ Objetivo de **coste 0** usando los planes gratuitos.
 ## Fase 5 — Alertas ✅
 
 - [x] Definir reglas de alerta (por % del presupuesto/límite o importe absoluto)
-- [x] Alertas globales (todo el hogar) y por concepto
+- [x] Alertas globales (todo el hogar), por concepto y **por presupuesto**
+- [x] Conceptos asignables a un presupuesto (gasto del presupuesto = sus conceptos)
+- [x] Presupuestos con **icono + color**, usables como concepto de gasto
+  (las despeses se asignan directamente a un presupuesto)
 - [x] Activar/desactivar, editar y borrar alertas
 - [x] Indicadores visuales: banner de alertas disparadas en dashboard y `/alerts`
 

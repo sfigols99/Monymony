@@ -58,7 +58,9 @@
     "navAlerts": "Alerts",
     "navAlertsDesc": "Warnings when you overspend",
     "nextHint": "🚧 Next: receipt OCR and expense prediction (see ROADMAP.md).",
-    "leaveHousehold": "Leave household"
+    "leaveHousehold": "Leave household",
+    "showSalaries": "Show salaries",
+    "hideSalaries": "Hide salaries"
   },
   "salary": {
     "label": "Your monthly salary (€)"
@@ -102,7 +104,10 @@
     "byCategoryEmpty": "No confirmed expenses yet this month.",
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
-    "you": "(you)"
+    "you": "(you)",
+    "spentOf": "Spent {spent} of {amount}",
+    "icon": "Icon",
+    "color": "Color"
   },
   "categories": {
     "title": "Categories",
@@ -117,7 +122,9 @@
     "create": "Create category",
     "yoursTitle": "Your categories",
     "empty": "No categories yet. Create the first one (energy, groceries, loans…).",
-    "limitLabel": "Limit {amount}/mo"
+    "limitLabel": "Limit {amount}/mo",
+    "budget": "Budget",
+    "noBudget": "No budget"
   },
   "expenses": {
     "title": "Expenses",
@@ -142,7 +149,9 @@
     "clearFilters": "Clear filters",
     "emptyFiltered": "No expenses match these filters.",
     "pending": "pending",
-    "fallbackName": "Expense"
+    "fallbackName": "Expense",
+    "budget": "Budget",
+    "noBudget": "No budget"
   },
   "alerts": {
     "title": "Alerts",
@@ -155,7 +164,7 @@
     "threshold": "Threshold",
     "thresholdPercent": "% of budget/limit",
     "thresholdAmount": "€ (absolute amount)",
-    "hintPercent": "Fires when reaching that % of the household budget (or the category's limit).",
+    "hintPercent": "Fires when reaching that % of the chosen scope's limit (household budget, a budget, or the category's limit).",
     "hintAmount": "Fires when monthly spending reaches that amount.",
     "create": "Create alert",
     "yoursTitle": "Your alerts",
@@ -167,7 +176,9 @@
     "thresholdLabel": "threshold {value}",
     "bannerOne": "1 alert triggered",
     "bannerMany": "{count} alerts triggered",
-    "bannerLine": "{name} — {scope}: {spent} of {limit} ({percent})"
+    "bannerLine": "{name} — {scope}: {spent} of {limit} ({percent})",
+    "scopeBudgets": "Budgets",
+    "scopeCategories": "Categories"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

@@ -25,7 +25,16 @@ export function BudgetItem({ budget }: { budget: Budget }) {
   return (
     <li className="rounded-xl border border-neutral-200 p-3 dark:border-neutral-800">
       <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
+          <span
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white"
+            style={{ backgroundColor: budget.color }}
+          >
+            <span className="material-symbols-rounded text-[22px]">
+              {budget.icon}
+            </span>
+          </span>
+          <div className="min-w-0">
           <p className="truncate font-medium">{budget.name}</p>
           <span
             className={`mt-0.5 inline-block rounded px-1.5 py-0.5 text-xs ${
@@ -36,6 +45,13 @@ export function BudgetItem({ budget }: { budget: Budget }) {
           >
             {budget.split === "equal" ? t("splitEqual") : t("splitProportional")}
           </span>
+          <span className="ml-2 text-xs text-neutral-400">
+            {t("spentOf", {
+              spent: formatEuro(budget.spent),
+              amount: formatEuro(budget.amount),
+            })}
+          </span>
+          </div>
         </div>
 
         <div className="flex shrink-0 items-center gap-1">

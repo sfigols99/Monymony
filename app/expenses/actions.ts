@@ -11,6 +11,7 @@ export type ExpenseActionState = { error: string } | { ok: true } | null;
 const expenseSchema = z.object({
   amount: z.coerce.number().positive("amountPositive"),
   categoryId: z.union([z.literal(""), z.string().uuid()]).transform((v) => (v === "" ? null : v)),
+  budgetId: z.union([z.literal(""), z.string().uuid()]).transform((v) => (v === "" ? null : v)),
   expenseDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "dateInvalid"),
   paidBy: z.union([z.literal(""), z.string().uuid()]).transform((v) => (v === "" ? null : v)),
   description: z
@@ -20,6 +21,17 @@ const expenseSchema = z.object({
     .optional()
     .transform((v) => (v ? v : null)),
 });
+
+function parseExpense(formData: FormData) {
+  return expenseSchema.safeParse({
+    amount: formData.get("amount"),
+    categoryId: formData.get("categoryId"),
+    budgetId: formData.get("budgetId") ?? "",
+    expenseDate: formData.get("expenseDate"),
+    paidBy: formData.get("paidBy"),
+    description: formData.get("description"),
+  });
+}
 
 /** Verify a member id belongs to the household (avoid trusting the client). */
 function isMember(household: { members: { userId: string }[] }, userId: string | null) {
@@ -31,13 +43,7 @@ export async function createExpense(
   _prev: ExpenseActionState,
   formData: FormData,
 ): Promise<ExpenseActionState> {
-  const parsed = expenseSchema.safeParse({
-    amount: formData.get("amount"),
-    categoryId: formData.get("categoryId"),
-    expenseDate: formData.get("expenseDate"),
-    paidBy: formData.get("paidBy"),
-    description: formData.get("description"),
-  });
+  const parsed = parseExpense(formData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
@@ -57,6 +63,7 @@ export async function createExpense(
     household_id: household.id,
     amount: parsed.data.amount,
     category_id: parsed.data.categoryId,
+    budget_id: parsed.data.budgetId,
     expense_date: parsed.data.expenseDate,
     paid_by: parsed.data.paidBy,
     description: parsed.data.description,
@@ -80,13 +87,7 @@ export async function updateExpense(
   const id = String(formData.get("id") ?? "");
   if (!id) return { error: "invalidExpense" };
 
-  const parsed = expenseSchema.safeParse({
-    amount: formData.get("amount"),
-    categoryId: formData.get("categoryId"),
-    expenseDate: formData.get("expenseDate"),
-    paidBy: formData.get("paidBy"),
-    description: formData.get("description"),
-  });
+  const parsed = parseExpense(formData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
@@ -103,6 +104,7 @@ export async function updateExpense(
     .update({
       amount: parsed.data.amount,
       category_id: parsed.data.categoryId,
+      budget_id: parsed.data.budgetId,
       expense_date: parsed.data.expenseDate,
       paid_by: parsed.data.paidBy,
       description: parsed.data.description,

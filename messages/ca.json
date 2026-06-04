@@ -58,7 +58,9 @@
     "navAlerts": "Alertes",
     "navAlertsDesc": "Avisos quan es gasta de més",
     "nextHint": "🚧 Següent: lectura de tiquets per OCR i predicció de despeses (vegeu ROADMAP.md).",
-    "leaveHousehold": "Surt de la llar"
+    "leaveHousehold": "Surt de la llar",
+    "showSalaries": "Mostra els salaris",
+    "hideSalaries": "Amaga els salaris"
   },
   "salary": {
     "label": "El teu salari mensual (€)"
@@ -102,7 +104,10 @@
     "byCategoryEmpty": "Encara no hi ha despeses confirmades aquest mes.",
     "prevMonth": "Mes anterior",
     "nextMonth": "Mes següent",
-    "you": "(tu)"
+    "you": "(tu)",
+    "spentOf": "Gastat {spent} de {amount}",
+    "icon": "Icona",
+    "color": "Color"
   },
   "categories": {
     "title": "Conceptes",
@@ -117,7 +122,9 @@
     "create": "Crea el concepte",
     "yoursTitle": "Els teus conceptes",
     "empty": "Encara no hi ha conceptes. Crea el primer (energia, supermercat, préstecs…).",
-    "limitLabel": "Límit {amount}/mes"
+    "limitLabel": "Límit {amount}/mes",
+    "budget": "Pressupost",
+    "noBudget": "Sense pressupost"
   },
   "expenses": {
     "title": "Despeses",
@@ -142,7 +149,9 @@
     "clearFilters": "Neteja els filtres",
     "emptyFiltered": "No hi ha despeses amb aquests filtres.",
     "pending": "pendent",
-    "fallbackName": "Despesa"
+    "fallbackName": "Despesa",
+    "budget": "Pressupost",
+    "noBudget": "Sense pressupost"
   },
   "alerts": {
     "title": "Alertes",
@@ -155,7 +164,7 @@
     "threshold": "Llindar",
     "thresholdPercent": "% del pressupost/límit",
     "thresholdAmount": "€ (import absolut)",
-    "hintPercent": "Salta en assolir aquest % del pressupost de la llar (o del límit del concepte).",
+    "hintPercent": "Salta en assolir aquest % del límit de l'àmbit triat (pressupost de la llar, un pressupost o el límit del concepte).",
     "hintAmount": "Salta quan la despesa del mes assoleix aquest import.",
     "create": "Crea l'alerta",
     "yoursTitle": "Les teves alertes",
@@ -167,7 +176,9 @@
     "thresholdLabel": "llindar {value}",
     "bannerOne": "1 alerta activada",
     "bannerMany": "{count} alertes activades",
-    "bannerLine": "{name} — {scope}: {spent} de {limit} ({percent})"
+    "bannerLine": "{name} — {scope}: {spent} de {limit} ({percent})",
+    "scopeBudgets": "Pressupostos",
+    "scopeCategories": "Conceptes"
   },
   "errors": {
     "generic": "Alguna cosa ha anat malament. Torna-ho a provar.",

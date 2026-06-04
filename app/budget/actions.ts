@@ -21,7 +21,23 @@ const budgetSchema = z.object({
   name: z.string().trim().min(1, "budgetNameRequired").max(60),
   amount: z.coerce.number().min(0, "budgetNegative"),
   split: z.enum(["equal", "proportional"]).default("proportional"),
+  icon: z.string().trim().min(1).max(50).default("savings"),
+  color: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/, "colorInvalid")
+    .default("#6366f1"),
 });
+
+function parseBudget(formData: FormData) {
+  return budgetSchema.safeParse({
+    name: formData.get("name"),
+    amount: formData.get("amount"),
+    split: formData.get("split") ?? undefined,
+    icon: formData.get("icon") ?? undefined,
+    color: formData.get("color") ?? undefined,
+  });
+}
 
 /** Re-render the views whose numbers depend on the planned budget. */
 function revalidateBudgetViews() {
@@ -100,11 +116,7 @@ export async function createBudget(
   _prev: BudgetActionState,
   formData: FormData,
 ): Promise<BudgetActionState> {
-  const parsed = budgetSchema.safeParse({
-    name: formData.get("name"),
-    amount: formData.get("amount"),
-    split: formData.get("split") ?? undefined,
-  });
+  const parsed = parseBudget(formData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
@@ -122,6 +134,8 @@ export async function createBudget(
     name: parsed.data.name,
     amount: parsed.data.amount,
     split: parsed.data.split,
+    icon: parsed.data.icon,
+    color: parsed.data.color,
     created_by: user?.id ?? null,
   });
   if (error) return { error: "generic" };
@@ -138,11 +152,7 @@ export async function updateBudget(
   const id = String(formData.get("id") ?? "");
   if (!id) return { error: "generic" };
 
-  const parsed = budgetSchema.safeParse({
-    name: formData.get("name"),
-    amount: formData.get("amount"),
-    split: formData.get("split") ?? undefined,
-  });
+  const parsed = parseBudget(formData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
@@ -157,6 +167,8 @@ export async function updateBudget(
       name: parsed.data.name,
       amount: parsed.data.amount,
       split: parsed.data.split,
+      icon: parsed.data.icon,
+      color: parsed.data.color,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);

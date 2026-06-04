@@ -9,6 +9,8 @@ export type Alert = {
   categoryName: string | null;
   categoryColor: string;
   categoryIcon: string;
+  budgetId: string | null;
+  budgetName: string | null;
   thresholdPercent: number | null;
   thresholdAmount: number | null;
   isActive: boolean;
@@ -27,6 +29,7 @@ type AlertRow = {
   id: string;
   name: string;
   category_id: string | null;
+  budget_id: string | null;
   threshold_percent: number | string | null;
   threshold_amount: number | string | null;
   is_active: boolean;
@@ -34,10 +37,12 @@ type AlertRow = {
     | { name: string; color: string; icon: string }[]
     | { name: string; color: string; icon: string }
     | null;
+  budgets: { name: string }[] | { name: string } | null;
 };
 
 function mapRow(r: AlertRow): Alert {
   const cat = Array.isArray(r.categories) ? r.categories[0] : r.categories;
+  const bud = Array.isArray(r.budgets) ? r.budgets[0] : r.budgets;
   return {
     id: r.id,
     name: r.name,
@@ -45,6 +50,8 @@ function mapRow(r: AlertRow): Alert {
     categoryName: cat?.name ?? null,
     categoryColor: cat?.color ?? "#9ca3af",
     categoryIcon: cat?.icon ?? "notifications",
+    budgetId: r.budget_id,
+    budgetName: bud?.name ?? null,
     thresholdPercent: r.threshold_percent === null ? null : Number(r.threshold_percent),
     thresholdAmount: r.threshold_amount === null ? null : Number(r.threshold_amount),
     isActive: r.is_active,
@@ -57,7 +64,7 @@ export async function getAlerts(householdId: string): Promise<Alert[]> {
   const { data } = await supabase
     .from("alerts")
     .select(
-      "id, name, category_id, threshold_percent, threshold_amount, is_active, categories(name, color, icon)",
+      "id, name, category_id, budget_id, threshold_percent, threshold_amount, is_active, categories(name, color, icon), budgets(name)",
     )
     .eq("household_id", householdId)
     .order("created_at", { ascending: true });
@@ -92,6 +99,12 @@ export async function getTriggeredAlerts(
     if (c.categoryId) spentByCategory.set(c.categoryId, c.spent);
   }
 
+  // Per-budget spend and planned amount, for budget-scoped alerts.
+  const budgetById = new Map<string, { spent: number; amount: number }>();
+  for (const b of budget.budgets) {
+    budgetById.set(b.id, { spent: b.spent, amount: b.amount });
+  }
+
   // Category limits, needed for per-category percent thresholds.
   const supabase = await createClient();
   const { data: catRows } = await supabase
@@ -108,18 +121,23 @@ export async function getTriggeredAlerts(
   for (const a of alerts) {
     if (!a.isActive) continue;
 
-    const spent = a.categoryId
-      ? spentByCategory.get(a.categoryId) ?? 0
-      : budget.spent;
+    // What this alert is watching: a budget, a category, or the whole household.
+    const spent = a.budgetId
+      ? budgetById.get(a.budgetId)?.spent ?? 0
+      : a.categoryId
+        ? spentByCategory.get(a.categoryId) ?? 0
+        : budget.spent;
 
     // Resolve the absolute € limit at which this alert fires.
     let limit: number | null = null;
     if (a.thresholdAmount != null) {
       limit = a.thresholdAmount;
     } else if (a.thresholdPercent != null) {
-      const base = a.categoryId
-        ? limitByCategory.get(a.categoryId) ?? null
-        : budget.plannedTotal;
+      const base = a.budgetId
+        ? budgetById.get(a.budgetId)?.amount ?? null
+        : a.categoryId
+          ? limitByCategory.get(a.categoryId) ?? null
+          : budget.plannedTotal;
       if (base != null && base > 0) {
         limit = (a.thresholdPercent / 100) * base;
       }

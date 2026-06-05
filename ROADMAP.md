@@ -77,6 +77,8 @@ Objetivo de **coste 0** usando los planes gratuitos.
 
 ## Fase 7 — Análisis y predicción
 
+- [x] Vista `/analisis`: balance del mes (suma de presupuestos vs. gasto) y
+  balance presupuesto a presupuesto, con navegación por meses
 - [ ] Dashboard con gráficos (gasto por concepto, evolución mensual)
 - [ ] Algoritmo de **predicción de gastos** futuros
 - [ ] Recomendaciones de ahorro

@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { getActiveHousehold } from "@/lib/household";
 import { getMonthlyBudget, normalizePeriod } from "@/lib/budget";
+import { getMonthlyTrend } from "@/lib/expenses";
 import { formatEuro, formatPercent } from "@/lib/format";
 import { MonthNav } from "@/components/MonthNav";
+import { DonutChart, type DonutSegment } from "@/components/charts/DonutChart";
+import { TrendChart, type TrendBar } from "@/components/charts/TrendChart";
 
 /** Tailwind color for a usage bar: red over budget, amber near it, else indigo. */
 function barColor(usedPercent: number, over: boolean) {
@@ -25,6 +28,7 @@ export default async function AnalysisPage({
 
   const t = await getTranslations("analysis");
   const tb = await getTranslations("budget");
+  const locale = await getLocale();
 
   const sp = await searchParams;
   const { year, month } = normalizePeriod(
@@ -32,11 +36,37 @@ export default async function AnalysisPage({
     sp.month ? Number(sp.month) : undefined,
   );
 
-  const budget = await getMonthlyBudget(household, year, month);
+  const [budget, trend] = await Promise.all([
+    getMonthlyBudget(household, year, month),
+    getMonthlyTrend(household.id, year, month, 6),
+  ]);
 
   const overallOver = budget.remaining < 0;
   const budgetedSpent = budget.budgets.reduce((s, b) => s + b.spent, 0);
   const unbudgeted = budget.spent - budgetedSpent;
+
+  // Donut: spend distribution by budget (+ an "unbudgeted" slice).
+  const donut: DonutSegment[] = budget.budgets
+    .filter((b) => b.spent > 0)
+    .map((b) => ({ label: b.name, value: b.spent, color: b.color }));
+  if (unbudgeted > 0.005) {
+    donut.push({ label: t("unbudgeted"), value: unbudgeted, color: "#9ca3af" });
+  }
+  donut.sort((a, b) => b.value - a.value);
+
+  // Trend: last 6 months total spend, with compact (no-decimals) euro labels.
+  const compact = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  });
+  const shortMonth = new Intl.DateTimeFormat(locale, { month: "short" });
+  const trendBars: TrendBar[] = trend.map((m) => ({
+    label: shortMonth.format(new Date(m.year, m.month - 1, 1)),
+    value: m.spent,
+    valueLabel: compact.format(m.spent),
+    current: m.year === year && m.month === month,
+  }));
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
@@ -83,8 +113,45 @@ export default async function AnalysisPage({
         </p>
       </section>
 
+      {/* Spend distribution (donut) */}
+      <section className="mb-6 rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
+        <h2 className="mb-4 text-lg font-semibold">{t("distributionTitle")}</h2>
+        {donut.length === 0 ? (
+          <p className="text-sm text-neutral-400">{t("noSpend")}</p>
+        ) : (
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="relative shrink-0">
+              <DonutChart segments={donut} />
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-xs text-neutral-400">{tb("spent")}</span>
+                <span className="text-lg font-bold">{formatEuro(budget.spent)}</span>
+              </div>
+            </div>
+            <ul className="min-w-[12rem] flex-1 space-y-1.5">
+              {donut.map((s, i) => (
+                <li key={i} className="flex items-center justify-between gap-3 text-sm">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span
+                      className="h-3 w-3 shrink-0 rounded-full"
+                      style={{ backgroundColor: s.color }}
+                    />
+                    <span className="truncate">{s.label}</span>
+                  </span>
+                  <span className="shrink-0 text-neutral-500">
+                    {formatEuro(s.value)}{" "}
+                    <span className="text-neutral-400">
+                      {formatPercent(budget.spent > 0 ? (s.value / budget.spent) * 100 : 0)}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+
       {/* Per-budget balance */}
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
+      <section className="mb-6 rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
         <h2 className="mb-4 text-lg font-semibold">{t("perBudgetTitle")}</h2>
 
         {budget.budgets.length === 0 ? (
@@ -139,6 +206,12 @@ export default async function AnalysisPage({
             )}
           </ul>
         )}
+      </section>
+
+      {/* Monthly spend trend */}
+      <section className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
+        <h2 className="mb-4 text-lg font-semibold">{t("trendTitle")}</h2>
+        <TrendChart data={trendBars} />
       </section>
     </main>
   );

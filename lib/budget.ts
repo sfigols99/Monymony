@@ -91,22 +91,39 @@ export async function getMonthlyBudget(
     .eq("month", month)
     .maybeSingle();
 
-  // The household's named budgets.
+  // Budget identities — the amount is effective-dated (see budget_amounts).
   const { data: budgetRows } = await supabase
     .from("budgets")
-    .select("id, name, amount, split, icon, color")
+    .select("id, name, split, icon, color")
     .eq("household_id", household.id)
     .order("created_at", { ascending: true });
 
-  const budgetDefs = (budgetRows ?? []).map((r) => ({
+  const identities = (budgetRows ?? []).map((r) => ({
     id: r.id as string,
     name: r.name as string,
-    amount: Number(r.amount) || 0,
     split: (r.split === "equal" ? "equal" : "proportional") as BudgetSplit,
     icon: (r.icon as string) || "savings",
     color: (r.color as string) || "#6366f1",
   }));
-  const budgetsTotal = budgetDefs.reduce((sum, b) => sum + b.amount, 0);
+
+  // Effective amount per budget = the latest version on/before this month.
+  const firstDay = `${year}-${String(month).padStart(2, "0")}-01`;
+  const amountByBudget = new Map<string, number>();
+  if (identities.length > 0) {
+    const { data: versions } = await supabase
+      .from("budget_amounts")
+      .select("budget_id, effective_from, amount")
+      .in("budget_id", identities.map((b) => b.id))
+      .lte("effective_from", firstDay)
+      .order("effective_from", { ascending: true });
+    for (const v of (versions ?? []) as {
+      budget_id: string;
+      amount: number | string;
+    }[]) {
+      // Ascending order → the last write wins = the latest effective version.
+      amountByBudget.set(v.budget_id, Number(v.amount) || 0);
+    }
+  }
 
   const salaryBudget = household.totalSalaries;
   const members = household.members;
@@ -127,27 +144,6 @@ export async function getMonthlyBudget(
         isCurrentUser: m.userId === household.currentUserId,
       };
     });
-
-  const budgets: Budget[] = budgetDefs.map((b) => ({
-    ...b,
-    shares: shareOf(b.amount, b.split),
-    spent: 0,
-  }));
-
-  // Resolve the effective total: per-month manual override > named budgets > salary.
-  let source: BudgetSource;
-  let plannedTotal: number;
-  if (stored?.is_manual) {
-    source = "manual";
-    plannedTotal = Number(stored.total_amount) || 0;
-  } else if (budgets.length > 0) {
-    source = "budgets";
-    plannedTotal = budgetsTotal;
-  } else {
-    source = "salary";
-    plannedTotal = salaryBudget;
-  }
-  const isManual = source === "manual";
 
   // Confirmed expenses in the period, summed per budget (the concept).
   const { start, end } = monthRange(year, month);
@@ -173,7 +169,32 @@ export async function getMonthlyBudget(
     }
   }
 
-  for (const b of budgets) b.spent = spentByBudget.get(b.id) ?? 0;
+  // A budget shows for this month if it's active (effective amount > 0) or has
+  // any spend; its amount is the effective version (0 when not yet active).
+  const budgets: Budget[] = identities
+    .map((b) => {
+      const amount = amountByBudget.get(b.id) ?? 0;
+      const sp = spentByBudget.get(b.id) ?? 0;
+      return { ...b, amount, spent: sp, shares: shareOf(amount, b.split) };
+    })
+    .filter((b) => b.amount > 0 || b.spent > 0);
+
+  const budgetsTotal = budgets.reduce((sum, b) => sum + b.amount, 0);
+
+  // Resolve the effective total: per-month manual override > named budgets > salary.
+  let source: BudgetSource;
+  let plannedTotal: number;
+  if (stored?.is_manual) {
+    source = "manual";
+    plannedTotal = Number(stored.total_amount) || 0;
+  } else if (budgets.length > 0) {
+    source = "budgets";
+    plannedTotal = budgetsTotal;
+  } else {
+    source = "salary";
+    plannedTotal = salaryBudget;
+  }
+  const isManual = source === "manual";
 
   // Per-member contributions: sum each member's share across all budgets.
   // "manual"/"salary" totals are treated as a single proportional budget.

@@ -38,6 +38,8 @@ Objetivo de **coste 0** usando los planes gratuitos.
 - [x] **N presupuestos con nombre** (hipoteca, súper…), cada uno con su importe
 - [x] **Reparto por presupuesto**: proporcional a los ingresos o a partes iguales
 - [x] Prioridad del total: override-mes > suma de presupuestos > salarios
+- [x] **Importe del presupuesto por mes** (effective-dated): editar "solo este
+  mes" o "este mes y los siguientes", sin tocar los meses anteriores
 - [x] Vista de planificación mensual (presupuesto vs. gastado) con navegación por meses
 - [x] Reparto de aportaciones por miembro según porcentaje
 - [x] Gasto agrupado por concepto en el mes

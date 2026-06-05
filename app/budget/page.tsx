@@ -99,7 +99,7 @@ export default async function BudgetPage({
         {budget.budgets.length > 0 && (
           <ul className="mb-4 space-y-2">
             {budget.budgets.map((b) => (
-              <BudgetItem key={b.id} budget={b} />
+              <BudgetItem key={b.id} budget={b} year={year} month={month} />
             ))}
           </ul>
         )}
@@ -109,7 +109,7 @@ export default async function BudgetPage({
 
         <div className="rounded-xl border border-dashed border-neutral-300 p-4 dark:border-neutral-700">
           <h3 className="mb-3 text-sm font-semibold">{t("newBudget")}</h3>
-          <BudgetLineForm />
+          <BudgetLineForm year={year} month={month} />
         </div>
       </section>
 

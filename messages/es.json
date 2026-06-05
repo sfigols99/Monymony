@@ -105,7 +105,11 @@
     "you": "(tú)",
     "spentOf": "Gastado {spent} de {amount}",
     "icon": "Icono",
-    "color": "Color"
+    "color": "Color",
+    "scopeLabel": "Aplicar el importe a",
+    "scopeForward": "Este mes y los siguientes",
+    "scopeMonth": "Solo este mes",
+    "scopeHint": "El importe se aplica desde el mes que estás viendo; los meses anteriores no se modifican."
   },
   "expenses": {
     "title": "Gastos",

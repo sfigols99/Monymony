@@ -105,7 +105,11 @@
     "you": "(tu)",
     "spentOf": "Gastat {spent} de {amount}",
     "icon": "Icona",
-    "color": "Color"
+    "color": "Color",
+    "scopeLabel": "Aplica l'import a",
+    "scopeForward": "Aquest mes i els següents",
+    "scopeMonth": "Només aquest mes",
+    "scopeHint": "L'import s'aplica des del mes que estàs veient; els mesos anteriors no es modifiquen."
   },
   "expenses": {
     "title": "Despeses",

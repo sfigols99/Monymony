@@ -8,7 +8,15 @@ import { formatEuro, formatPercent } from "@/lib/format";
 import { BudgetLineForm } from "./BudgetLineForm";
 
 /** A row in the named-budgets list: name, split badge, amount, edit/delete. */
-export function BudgetItem({ budget }: { budget: Budget }) {
+export function BudgetItem({
+  budget,
+  year,
+  month,
+}: {
+  budget: Budget;
+  year: number;
+  month: number;
+}) {
   const t = useTranslations("budget");
   const tc = useTranslations("common");
   const [editing, setEditing] = useState(false);
@@ -17,7 +25,12 @@ export function BudgetItem({ budget }: { budget: Budget }) {
   if (editing) {
     return (
       <li className="rounded-xl border border-neutral-200 p-3 dark:border-neutral-800">
-        <BudgetLineForm initial={budget} onDone={() => setEditing(false)} />
+        <BudgetLineForm
+          year={year}
+          month={month}
+          initial={budget}
+          onDone={() => setEditing(false)}
+        />
       </li>
     );
   }

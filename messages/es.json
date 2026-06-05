@@ -190,6 +190,9 @@
     "overallTitle": "Cómo va el mes",
     "perBudgetTitle": "Balance por presupuesto",
     "empty": "Aún no hay presupuestos para analizar.",
-    "unbudgeted": "Sin presupuesto"
+    "unbudgeted": "Sin presupuesto",
+    "distributionTitle": "Reparto del gasto",
+    "trendTitle": "Evolución (últimos meses)",
+    "noSpend": "Aún no hay gasto este mes."
   }
 }

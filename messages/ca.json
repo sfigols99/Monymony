@@ -190,6 +190,9 @@
     "overallTitle": "Com va el mes",
     "perBudgetTitle": "Balanç per pressupost",
     "empty": "Encara no hi ha pressupostos per analitzar.",
-    "unbudgeted": "Sense pressupost"
+    "unbudgeted": "Sense pressupost",
+    "distributionTitle": "Repartiment de la despesa",
+    "trendTitle": "Evolució (últims mesos)",
+    "noSpend": "Encara no hi ha despesa aquest mes."
   }
 }

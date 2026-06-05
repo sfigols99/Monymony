@@ -58,7 +58,9 @@
     "nextHint": "🚧 Next: receipt OCR and expense prediction (see ROADMAP.md).",
     "leaveHousehold": "Leave household",
     "showSalaries": "Show salaries",
-    "hideSalaries": "Hide salaries"
+    "hideSalaries": "Hide salaries",
+    "navAnalysis": "Analysis",
+    "navAnalysisDesc": "How the month is going: budget vs. spending"
   },
   "salary": {
     "label": "Your monthly salary (€)"
@@ -177,5 +179,13 @@
     "emailNotConfirmed": "Confirm your email before signing in.",
     "passwordTooShort": "The password must be at least 6 characters.",
     "budgetNameRequired": "Give the budget a name"
+  },
+  "analysis": {
+    "title": "Analysis",
+    "subtitle": "Budget vs. spending for the month.",
+    "overallTitle": "How the month is going",
+    "perBudgetTitle": "Balance per budget",
+    "empty": "No budgets to analyze yet.",
+    "unbudgeted": "No budget"
   }
 }

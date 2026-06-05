@@ -58,7 +58,9 @@
     "nextHint": "🚧 Següent: lectura de tiquets per OCR i predicció de despeses (vegeu ROADMAP.md).",
     "leaveHousehold": "Surt de la llar",
     "showSalaries": "Mostra els salaris",
-    "hideSalaries": "Amaga els salaris"
+    "hideSalaries": "Amaga els salaris",
+    "navAnalysis": "Anàlisi",
+    "navAnalysisDesc": "Com va el mes: pressupost vs. despesa"
   },
   "salary": {
     "label": "El teu salari mensual (€)"
@@ -177,5 +179,13 @@
     "emailNotConfirmed": "Confirma el teu correu abans d'iniciar la sessió.",
     "passwordTooShort": "La contrasenya ha de tenir almenys 6 caràcters.",
     "budgetNameRequired": "Posa un nom al pressupost"
+  },
+  "analysis": {
+    "title": "Anàlisi",
+    "subtitle": "Relació entre pressupost i despesa del mes.",
+    "overallTitle": "Com va el mes",
+    "perBudgetTitle": "Balanç per pressupost",
+    "empty": "Encara no hi ha pressupostos per analitzar.",
+    "unbudgeted": "Sense pressupost"
   }
 }

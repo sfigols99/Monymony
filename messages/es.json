@@ -58,7 +58,9 @@
     "nextHint": "🚧 Siguiente: lectura de tickets por OCR y predicción de gastos (ver ROADMAP.md).",
     "leaveHousehold": "Salir del hogar",
     "showSalaries": "Mostrar salarios",
-    "hideSalaries": "Ocultar salarios"
+    "hideSalaries": "Ocultar salarios",
+    "navAnalysis": "Análisis",
+    "navAnalysisDesc": "Cómo va el mes: presupuesto vs. gasto"
   },
   "salary": {
     "label": "Tu salario mensual (€)"
@@ -177,5 +179,13 @@
     "emailNotConfirmed": "Confirma tu email antes de iniciar sesión.",
     "passwordTooShort": "La contraseña debe tener al menos 6 caracteres.",
     "budgetNameRequired": "Pon un nombre al presupuesto"
+  },
+  "analysis": {
+    "title": "Análisis",
+    "subtitle": "Relación entre presupuesto y gasto del mes.",
+    "overallTitle": "Cómo va el mes",
+    "perBudgetTitle": "Balance por presupuesto",
+    "empty": "Aún no hay presupuestos para analizar.",
+    "unbudgeted": "Sin presupuesto"
   }
 }

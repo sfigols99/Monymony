@@ -37,6 +37,7 @@ export default async function Home() {
   const navCards = [
     { href: "/expenses", icon: "receipt_long", title: t("navExpenses"), desc: t("navExpensesDesc") },
     { href: "/budget", icon: "savings", title: t("navBudget"), desc: t("navBudgetDesc") },
+    { href: "/analysis", icon: "monitoring", title: t("navAnalysis"), desc: t("navAnalysisDesc") },
     { href: "/alerts", icon: "notifications", title: t("navAlerts"), desc: t("navAlertsDesc") },
   ];
 

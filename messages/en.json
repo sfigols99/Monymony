@@ -186,6 +186,9 @@
     "overallTitle": "How the month is going",
     "perBudgetTitle": "Balance per budget",
     "empty": "No budgets to analyze yet.",
-    "unbudgeted": "No budget"
+    "unbudgeted": "No budget",
+    "distributionTitle": "Spending breakdown",
+    "trendTitle": "Trend (recent months)",
+    "noSpend": "No spending yet this month."
   }
 }

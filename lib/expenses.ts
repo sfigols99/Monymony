@@ -41,6 +41,51 @@ export type ExpenseFilters = {
   paidBy?: string;
 };
 
+/** Total confirmed spend for one month. */
+export type MonthSpend = { year: number; month: number; spent: number };
+
+/**
+ * Confirmed spend for each of the last `count` months ending at (year, month),
+ * oldest first — for the analysis trend chart.
+ */
+export async function getMonthlyTrend(
+  householdId: string,
+  year: number,
+  month: number,
+  count = 6,
+): Promise<MonthSpend[]> {
+  const supabase = await createClient();
+
+  const endIndex = year * 12 + (month - 1);
+  const months: MonthSpend[] = [];
+  for (let i = count - 1; i >= 0; i--) {
+    const idx = endIndex - i;
+    months.push({ year: Math.floor(idx / 12), month: (idx % 12) + 1, spent: 0 });
+  }
+
+  const first = months[0];
+  const start = `${first.year}-${String(first.month).padStart(2, "0")}-01`;
+  const endDate = new Date(year, month, 1); // first day after the current month
+  const end = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, "0")}-01`;
+
+  const { data } = await supabase
+    .from("expenses")
+    .select("amount, expense_date")
+    .eq("household_id", householdId)
+    .eq("status", "confirmed")
+    .gte("expense_date", start)
+    .lt("expense_date", end);
+
+  const byKey = new Map<string, number>();
+  for (const r of (data ?? []) as { amount: number | string; expense_date: string }[]) {
+    const [y, mo] = r.expense_date.split("-");
+    const key = `${Number(y)}-${Number(mo)}`;
+    byKey.set(key, (byKey.get(key) ?? 0) + (Number(r.amount) || 0));
+  }
+  for (const m of months) m.spent = byKey.get(`${m.year}-${m.month}`) ?? 0;
+  return months;
+}
+
 function monthRange(year: number, month: number) {
   const start = `${year}-${String(month).padStart(2, "0")}-01`;
   const endDate = new Date(year, month, 1);

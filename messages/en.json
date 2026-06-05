@@ -105,7 +105,11 @@
     "you": "(you)",
     "spentOf": "Spent {spent} of {amount}",
     "icon": "Icon",
-    "color": "Color"
+    "color": "Color",
+    "scopeLabel": "Apply the amount to",
+    "scopeForward": "This month and the following",
+    "scopeMonth": "This month only",
+    "scopeHint": "The amount applies from the month you are viewing; earlier months are never changed."
   },
   "expenses": {
     "title": "Expenses",

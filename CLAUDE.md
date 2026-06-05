@@ -76,8 +76,14 @@ There is no test runner configured yet.
   `deleteAlert`); the form posts a single `scope` field (`""` | `bud:<id>`).
   `AlertBanner` shows triggered alerts on the dashboard and `/alerts`.
 - **Budget** lives at `/budget`. A household defines **N named budgets**
-  (`budgets` table: `name`, `amount`, `split` ∈ `equal` | `proportional`).
-  `lib/budget.ts` (`getMonthlyBudget`) resolves the planned total by priority —
+  (`budgets` table: `name`, `split` ∈ `equal` | `proportional`, `icon`, `color`).
+  A budget's **amount is effective-dated** in `budget_amounts` (`effective_from`,
+  `amount`): for a month, the amount is the latest version on/before that month,
+  so editing offers a scope — *this month and following* (`forward`: upsert at
+  the month + drop later versions) or *this month only* (`month`: set the month,
+  and pin the next month to its previous value) — and **never changes earlier
+  months**. New budgets apply from the viewed month on. `lib/budget.ts`
+  (`getMonthlyBudget`) resolves the planned total by priority —
   per-month manual override (`monthly_budgets.is_manual`) → sum of named budgets
   → salary-derived — exposed as `source: "manual" | "budgets" | "salary"` plus
   the `budgets` list. Per-member **contributions** are computed per budget by its
@@ -118,7 +124,8 @@ Schema and RLS live in `supabase/migrations/`. Core tables:
 - `households` — a house/group, has an `owner_id`.
 - `household_members` — membership + `monthly_salary`; budget % is derived from salaries.
 - `monthly_budgets` — per-month manual override of the planned total (`is_manual`).
-- `budgets` — named recurring budgets (`name`, `amount`, `split` equal/proportional, `icon`, `color`); the planned total is their sum. **A budget IS the expense concept** (its `amount` = how much you can spend on it).
+- `budgets` — named recurring budgets (`name`, `split` equal/proportional, `icon`, `color`). **A budget IS the expense concept.**
+- `budget_amounts` — effective-dated amount per budget (`effective_from`, `amount`); a month's amount is the latest version on/before it.
 - `expenses` — `amount`, `budget_id` (the concept), `expense_date`, `source` (`form`/`ticket`), `status` (`pending`/`confirmed`), `receipt_url`.
 - `alerts` — `budget_id` (null = whole-household) + thresholds (`threshold_percent` or `threshold_amount`).
 
@@ -135,10 +142,12 @@ category↔budget links, budget icon/color and `expenses.budget_id`.
 `0006_unify_concepts.sql` **removes the `categories` table entirely** — a budget
 is now the sole expense concept — and drops `expenses.category_id` /
 `alerts.category_id` (backfilling `expenses.budget_id` from the category's budget
-first). The receipts/OCR migration becomes `0007` and is applied last.
+first). `0007_budget_amounts.sql` makes a budget's **amount effective-dated**
+(new `budget_amounts` table, seeded from `budgets.amount`, then drops that
+column). The receipts/OCR migration becomes the last one when revisited.
 
 Migrations are applied manually in the Supabase SQL editor, in order
-(`0001…`, `0002…`, `0003…`, `0004…`, `0005…`, `0006…`).
+(`0001…`, `0002…`, `0003…`, `0004…`, `0005…`, `0006…`, `0007…`).
 
 ## Environment
 

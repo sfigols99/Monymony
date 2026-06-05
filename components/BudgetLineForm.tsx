@@ -17,9 +17,13 @@ import { ColorPicker } from "./ColorPicker";
  * it edits; otherwise it creates and resets on success.
  */
 export function BudgetLineForm({
+  year,
+  month,
   initial,
   onDone,
 }: {
+  year: number;
+  month: number;
   initial?: Budget;
   onDone?: () => void;
 }) {
@@ -52,6 +56,8 @@ export function BudgetLineForm({
       {editing && <input type="hidden" name="id" value={initial!.id} />}
       <input type="hidden" name="icon" value={icon} />
       <input type="hidden" name="color" value={color} />
+      <input type="hidden" name="year" value={year} />
+      <input type="hidden" name="month" value={month} />
 
       <div className="flex flex-wrap items-end gap-3">
         <span
@@ -118,6 +124,24 @@ export function BudgetLineForm({
         <label className="mb-1.5 block text-sm font-medium">{t("icon")}</label>
         <IconPicker value={icon} onChange={setIcon} color={color} />
       </div>
+
+      {editing && (
+        <div>
+          <label htmlFor="b-scope" className="mb-1 block text-sm font-medium">
+            {t("scopeLabel")}
+          </label>
+          <select
+            id="b-scope"
+            name="scope"
+            defaultValue="forward"
+            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800"
+          >
+            <option value="forward">{t("scopeForward")}</option>
+            <option value="month">{t("scopeMonth")}</option>
+          </select>
+          <p className="mt-1 text-xs text-neutral-400">{t("scopeHint")}</p>
+        </div>
+      )}
 
       {state && "error" in state && (
         <p className="text-sm text-red-600">{te(state.error)}</p>
